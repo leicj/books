@@ -1,0 +1,11 @@
+     we first should known:
+(define (p) (p))
+(p)
+     is running forever!
+so if the code:
+(define (p) (p))
+(define (test x y)
+(if (= x 0) 0 y))
+(test 0 (p))
+     running forever, it use the normal-order evaluation, else use applicative-order evaluation.
+     in my R5S5,it running…….
