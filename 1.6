@@ -1,0 +1,6 @@
+(define (new-if predicate then-clause else-clause)
+  (cond (predicate then-clause)
+        (else else-clause)))
+(new-if #t (display "true") (display "false"))
+  the output is:truefalse. So you known why it error.
+  for the cond, every condition will be accumulated.
