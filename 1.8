@@ -1,0 +1,45 @@
+the first solution is:
+(define (cube-root guess x)
+  (if (good-enough? guess x)
+      guess
+      (cube-root (improve guess x) x)))
+
+(define (improve guess x)
+  (/ (+ (/ x (square guess)) (* 2 guess)) 3))
+
+(define (square x) (* x x))
+
+(define (good-enough? guess x)
+  (< (abs (- (* guess guess guess) x)) 0.01))
+
+(define (new-cube x)
+  (cube-root 1.0 x))
+
+(new-cube 999999999999999999999999999999999)
+(new-cube 0.0000000001)
+  it will error when the number is very small, like 0.0000000001.
+  
+so we should change the good-enough? function:
+(define (cube-root guess x)
+  (if (good-enough? guess (improve guess x))
+      (improve guess x)
+      (cube-root (improve guess x) x)))
+
+(define (improve guess x)
+  (/ (+ (/ x (square guess)) (* 2 guess)) 3))
+
+(define (square x) (* x x))
+
+;(define (good-enough? guess x)
+ ; (< (abs (- (* guess guess guess) x)) 0.01))
+
+(define (good-enough? old-value new-value)
+  (> 0.01
+     (/ (abs (- old-value new-value))
+        old-value)))
+
+(define (new-cube x)
+  (cube-root 1.0 x))
+
+(new-cube 999999999999999999999999999999999)
+(new-cube 0.0000000001)
