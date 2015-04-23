@@ -13,8 +13,9 @@
     
   when we accumulate (+ 4 5), the step is:
   (+ 3 (inc 5))
-  (+ 2 (inc (inc 5)))
-  (+ 1 (inc (inc (inc 5))))
-  (inc (inc (inc (inc 5))))
-    but it's a interaction progress,because the + save the (3, (inc 5)) result, not wait the (inc 5) accumulate the result.
+  (+ 2 (inc 6))
+  (+ 1 (inc 7))
+  (inc 8)
+  (9)
+    so it's a interaction progress,because the + save the (3, (inc 5)) result, not wait the (inc 5) accumulate the result.
     
