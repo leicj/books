@@ -1,0 +1,10 @@
+  we could use the tree recursive:
+(define (pascal row col)
+  (if (or (= col 0) (= col row))
+      1
+      (+ (pascal (- row 1) (- col 1))
+         (pascal (- row 1) col))))
+
+(pascal 4 0)
+(pascal 4 2)
+(pascal 3 2)
