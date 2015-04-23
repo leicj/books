@@ -1,0 +1,20 @@
+(define (+ a b)
+  (if (= a 0) b (inc (+ (dec a) b))))
+  
+  when we accumulate (+ 4 5), the step is:
+  (inc (+ 3 5))
+  (inc (inc (+ 2 5)))
+  (inc (inc (inc (+ 1 5))))
+  (inc (inc (inc (inc 5))))
+    so it's a recursive progress.
+    
+  (define (+ a b)
+    (if (= a 0) b (+ (dec a) (inc b))))
+    
+  when we accumulate (+ 4 5), the step is:
+  (+ 3 (inc 5))
+  (+ 2 (inc (inc 5)))
+  (+ 1 (inc (inc (inc 5))))
+  (inc (inc (inc (inc 5))))
+    but it's a interaction progress,because the + save the (3, (inc 5)) result, not wait the (inc 5) accumulate the result.
+    
