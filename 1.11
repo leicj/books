@@ -1,0 +1,18 @@
+  the recursive is simple:
+  (define (f n)
+  (if (< n 3)
+      n
+      (+ (f (- n 1))
+         (* 2 (f (- n 2)))
+         (* 3 (f (- n 3))))))
+         
+  and the iteration like that:
+  (define (f n)
+  (define (iter-f a b c n result)
+    (cond ((= n a) (+ a result))
+          ((= n b) (+ b result))
+          ((= n c) (+ c result))
+          (else
+           (iter-f a b c (- n 3) (+ (- n 1) (* 2 (- n 2)) (* 3 (- n 3)))))))
+  (iter-f 0 1 2 n 0))
+    we must use result to store the result.
