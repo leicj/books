@@ -1,0 +1,51 @@
+;base ^ exp % m
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder
+          (square (expmod base (/ exp 2) m))
+          m))
+        (else
+         (remainder
+          (* base (expmod base (- exp 1) m))
+          m))))
+
+; test base ^ exp % m == base
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (fast-prime? n times)
+  (cond ((= times 0) true)
+        ((fermat-test n) (fast-prime? n (- times 1)))
+        (else false)))
+
+;accumulate the time
+(define runtime current-inexact-milliseconds)
+(define (timed-prime-test n)
+  (newline)
+  (display n)
+  (start-prime-test n (runtime)))
+(define (start-prime-test n start-time)
+  (if (fast-prime? n 10)
+      (report-prime (- (runtime) start-time))))
+(define (report-prime elapsed-time)
+  (display " *** ")
+  (display elapsed-time))
+(define (get-odd n)
+  (if (remainder n 2)
+      (+ n 1)
+      (+ n 2)))
+
+(define (search-for-primes number times)
+  (if (fast-prime? number times)
+      (timed-prime-test number)
+      (search-for-primes (get-odd number) times)))
+(search-for-primes 999999 10)
+(search-for-primes 1000000 10)
+
+the time is:
+1000003 *** 0.06298828125
+1000003 *** 0.031005859375
+    and it change every time.
