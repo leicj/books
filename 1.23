@@ -35,11 +35,10 @@
   (display (- (runtime) start-time))
   )
 
-(timed-prime-test 1999999999 prime-fast?)
-(timed-prime-test 1999999999 prime?)
+(timed-prime-test 100000000000097 prime-fast?)
+(timed-prime-test 100000000000097 prime?)
 
 but the time is:
 
-1999999999 *** 0.15283203125
-1999999999 *** 0.080078125
-  why?
+100000000000097 *** 729.56298828125
+100000000000097 *** 1075.843017578125
