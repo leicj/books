@@ -1,0 +1,4 @@
+if a = (1 + 2)
+square a == 3 * 3 = 9
+but (1 + 2) * (1 + 2) will be:1 * 1 + 1 * 2 + 1 * 2 + 2 * 2 = 9
+that is the reason why the speed will slow down.
