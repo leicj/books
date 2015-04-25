@@ -1,0 +1,19 @@
+the code:
+(define (fast-expt-iteration b n)
+  (define (iter-fast index-start index-end old-value result)
+    (cond ((= 0 index-end)
+           1)
+          ((= index-start index-end)
+           (* result old-value))
+          ((< (* 2 index-start) index-end)
+           (iter-fast (* 2 index-start) index-end (* old-value old-value) result))
+          (else
+           (iter-fast 1 (- index-end index-start) b (* result old-value)))))
+  (iter-fast 1 n b 1))
+
+(fast-expt-iteration 2 0)
+(fast-expt-iteration 2 1)
+(fast-expt-iteration 2 5)
+(fast-expt-iteration 2 10)
+(fast-expt-iteration 2 14)
+
