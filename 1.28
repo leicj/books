@@ -26,4 +26,12 @@
 (fast-prime? 6601 10)
 (fast-prime? 101 10)
 
-  add the: a^(n - 1) % n == 1 when n is a prime, and a < n
+  add the: a^(n - 1) % n == 1 when n is a prime, and a < n.
+  the output is:
+#f
+#f
+#f
+#f
+#f
+#f
+#t
