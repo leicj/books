@@ -19,3 +19,7 @@
 (simpson cube 0 1 100)
 ;0.2500000000000003
 (simpson cube 0 1 1000)
+
+  we should known that in sum function, a is the k, and b is the n, k = 0.0, n = 100 or 1000, 
+we increase k to n, when k > n and stop.
+  but the a value is (term k), and b is just a value for accumulate.
