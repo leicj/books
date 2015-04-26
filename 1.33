@@ -1,0 +1,39 @@
+(define (accumulate combiner null-value term a next b)
+  (if (> a b)
+      null-value
+      (combiner (term a)
+                (accumulate combiner null-value term (next a) next b))))
+(define (sum-new term a next b)
+  (accumulate add 0 term a next b))
+
+(define (add x y) (+ x y))
+
+(define (accumulate-iteration combiner null-value term a next b)
+  (define (iter-accumulate a result)
+    (if (> a b)
+        result
+        (iter-accumulate (next a) (combiner (term a) result))))
+  (iter-accumulate a null-value))
+(define (sum-new-iteration term a next b)
+  (accumulate-iteration add 0 term a next b))
+
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+
+(define (cube x) (* x x x))
+
+(define (integral f a b dx sum-method)
+  (define (add-dx x)
+    (+ x dx))
+  (* (sum-method f (+ a (/ dx 2.0)) add-dx b)
+     dx))
+
+;0.24998750000000042
+(integral cube 0 1 0.001 sum)
+;0.249999875000001
+(integral cube 0 1 0.001 sum-new)
+;0.24999987500000073
+(integral cube 0 1 0.001 sum-new-iteration)
