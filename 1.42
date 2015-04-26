@@ -1,0 +1,5 @@
+(define (square x) (* x x))
+(define (inc x) (+ x 1))
+(define (compose-new f g)
+  (lambda (x) (f (g x))))
+((compose-new square inc) 6)

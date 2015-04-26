@@ -1,0 +1,6 @@
+(define dx 0.00001)
+(define (square x) (* x x))
+(define (fun f)
+  (lambda (x) (/ (+ (f (- x dx)) (f x) (f (+ x dx))) 3)))
+;9.000000000066665
+((fun square) 3)
