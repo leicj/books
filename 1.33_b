@@ -1,0 +1,43 @@
+(define (filtered-accumulate combiner null-value term a next b filter?)
+  (if (> a b)
+      null-value
+      (if (filter? a b)
+          (combiner (term a)
+                    (filtered-accumulate combiner null-value term (next a) next b filter?))
+          (combiner null-value
+                    (filtered-accumulate combiner null-value term (next a) next b filter?)))))
+
+;prime
+(define (square x) (* x x))
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder (square (expmod base (/ exp 2) m))
+                    m))
+        (else
+         (remainder (* base (expmod base (- exp 1) m))
+                    m))))
+(define (fermat-test n)
+  (define (try-it a)
+    (and (= (expmod a n n) a)
+         (= (expmod a (- n 1) n) 1)))
+  (try-it (+ 1 (random (- n 1)))))
+(define (fast-prime? n times)
+  (cond ((= times 0) true)
+        ((fermat-test n) (fast-prime? n (- times 1)))
+        (else
+         false)))
+(define (prime? n)
+  (fast-prime? n 2))
+
+(define (gcd? i n)
+  (if (= (gcd i n) 1)
+      true
+      false))
+
+
+(define (add x y) (+ x y))
+(define (mul x y) (* x y))
+(define (next k) (+ k 1))
+;189 = 3 * 7 * 9
+(filtered-accumulate mul 1 identity 2 next 10 gcd?)
