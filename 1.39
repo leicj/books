@@ -1,0 +1,18 @@
+(define (cont-frac-recursive n d k)
+  (define (iter-cont-frac index)
+    (if (= index k)
+        (/ (n index) (d index))
+        (/ (n index) (+ (d index)
+                        (iter-cont-frac (+ index 1))))))
+  (iter-cont-frac 1))
+
+(define (square x) (* x x))
+(define (tan-cf x k)
+  (define (iter-tan-cf index)
+    (if (or (= k index) (> index k))
+        (/ x index)
+        (/ (square x) (- index
+                         (iter-tan-cf (+ index 2))))))
+  (iter-tan-cf 1.0))
+;-58.721391515692936
+(tan-cf 100 1000)
