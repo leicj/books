@@ -18,10 +18,12 @@
       (lambda (x) (f x))
       (lambda (x) (f ((repeated f (- n 1)) x)))
       ))
-((repeated square 2) 5)
 
-;how to define new-average????
-(define (new-average ))
+(define (average-damp f) (lambda (x) (average x (f x))))
+
+
+(define (new-average f n)
+  ((repeated average-damp n) f))
 
 (define (expmod base n)
   (if (= n 1)
@@ -30,6 +32,14 @@
 (define (sqrt-new-n x n)
   (fixed-point (lambda (y) (new-average y (/ x (expmod y (- n 1))) n))
                1.0))
-
-
-;(sqrt-new-n 11 3)
+(define (sqrt-new-n x n)
+  (fixed-point (new-average (lambda (y)
+                                (/ x (expmod y (- n 1))))
+                              (/ (log n) (log 2)))
+               1.0))
+;3.000000000000033
+(sqrt-new-n 81 4)
+;4.805898062426825
+(sqrt-new-n 111 3)
+;3.0
+(sqrt-new-n 9 2)
