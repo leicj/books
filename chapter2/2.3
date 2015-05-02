@@ -1,0 +1,61 @@
+; make a point
+(define (make-point x y) (cons x y))
+(define (x-point p) (car p))
+(define (y-point p) (cdr p))
+
+; make a segment
+(define (make-segment p1 p2) (cons p1 p2))
+(define (start-segment seg) (car seg))
+(define (end-segment seg) (cdr seg))
+
+;define midpoint-segment
+(define (midpoint-segment seg)
+  (make-point (average (x-point (start-segment seg))
+                        (x-point (end-segment seg)))
+               (average (y-point (start-segment seg))
+                        (y-point (end-segment seg)))))
+;define len of segment
+(define (len-seg seg)
+  (sqrt (+ (square (- (x-point (start-segment seg))
+                      (x-point (end-segment seg))))
+           (square (- (y-point (start-segment seg))
+                      (y-point (end-segment seg)))))))
+;define square
+(define (square x) (* x x))
+;define average
+(define (average x y) (/ (+ x y) 2))
+
+;define rectangles
+(define (make-rectangles seg1 seg2) (cons seg1 seg2))
+(define (make-rectangles-point p1 p2 p3)
+  (make-rectangles (make-segment p1 p2)
+                   (make-segment p1 p3)))
+(define (x-rectangles rec) (car rec))
+(define (y-rectangles rec) (cdr rec))
+;len and height of rec
+(define (len-rectangles rec) (len-seg (x-rectangles rec)))
+(define (height-rectangles rec) (len-seg (y-rectangles rec)))
+;accumulate perimeter
+(define (perimeter-rec rec)
+  (* 2 (+ (len-rectangles rec) (height-rectangles rec))))
+;accumulate area
+(define (area-rec rec)
+  (* (len-rectangles rec) (height-rectangles rec)))
+
+(define p1 (make-point 1 2))
+(define p2 (make-point 1 10))
+(define p3 (make-point 10 2))
+(define seg1 (make-segment p1 p2))
+(define seg2 (make-segment p1 p3))
+(define rec (make-rectangles seg1 seg2))
+(define rec-point (make-rectangles-point p1 p2 p3))
+;34
+(perimeter-rec rec)
+;72
+(area-rec rec)
+;34
+(perimeter-rec rec-point)
+;72
+(area-rec rec-point)
+
+
