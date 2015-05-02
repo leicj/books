@@ -1,0 +1,20 @@
+(define (expmod base n)
+  (if (= 0 n)
+      1
+      (* base (expmod base (- n 1)))))
+(define (div-nums base sum)
+  (define (iter-div total count)
+    (if (not (= 0 (remainder total base)))
+        count
+        (iter-div (/ total base) (+ count 1))))
+  (iter-div sum 0))
+
+(define (new-cons a b) (* (expmod 2 a) (expmod 3 b)))
+(define (new-car z) (div-nums 2 z))
+(define (new-cdr z) (div-nums 3 z))
+
+(define z (new-cons 9 11))
+;9
+(new-car z)
+;11
+(new-cdr z)
