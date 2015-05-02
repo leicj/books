@@ -1,0 +1,2 @@
+(define (make-center-percent c p)
+  (make-center (* c (- 1 p)) (* c (+ 1 p))))
