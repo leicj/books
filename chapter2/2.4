@@ -1,0 +1,12 @@
+(define (new-cons x y)
+  (lambda (m) (m x y)))
+(define (new-car z)
+  (z (lambda (p q) p)))
+(define (new-cdr z)
+  (z (lambda (p q) q)))
+
+(define x (new-cons 1 2))
+;1
+(new-car x)
+;2
+(new-cdr x)
