@@ -1,2 +1,24 @@
-(define (make-center-percent c p)
-  (make-center (* c (- 1 p)) (* c (+ 1 p))))
+(define (make-interval a b) (cons a b))
+(define (upper-bound interval) (max (car interval) (cdr interval)))
+(define (lower-bound interval) (min (car interval) (cdr interval)))
+(define (center i) (/ (+ (upper-bound i) (lower-bound i)) 2))
+
+(define (make-interval-center-percent c pct)
+  (let ((width (* c (/ pct 100.0))))
+    (make-interval (- c width) (+ c width))))
+
+(define (percent-tolerance i)
+  (let ((center (/ (+ (upper-bound i) (lower-bound i)) 2.0))
+        (width (/ (- (upper-bound i) (lower-bound i)) 2.0)))
+    (* (/ width center) 100)))
+
+; a quick check:
+(define i (make-interval-center-percent 10 50))
+;5.0
+(lower-bound i)
+;15.0
+(upper-bound i)
+;10.0
+(center i)
+;50.0
+(percent-tolerance i)
