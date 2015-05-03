@@ -1,0 +1,18 @@
+(define nil '())
+;bad reverse
+(define (new-reverse list1)
+  (if (null? list1)
+      nil
+      (list (new-reverse (cdr list1)) (car list1))))
+
+;good reverse
+(define (nn-reverse list1)
+  (define (iter-reverse lst lst-value)
+    (if (null? lst)
+        lst-value
+        (iter-reverse (cdr lst) (cons (car lst) lst-value))))
+  (iter-reverse list1 nil))
+;(((((() 25) 16) 9) 4) 1)
+(new-reverse (list 1 4 9 16 25))
+;(25 16 9 4 1)
+(nn-reverse (list 1 4 9 16 25))
