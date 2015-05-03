@@ -1,0 +1,13 @@
+(define nil '())
+(define (new-last-pair list1)
+  (define (iter-last-pair lst lst-value)
+    (if (null? lst)
+        lst-value
+        (iter-last-pair (cdr lst) (car lst))))
+  (iter-last-pair list1 nil))
+;34
+(new-last-pair (list 23 72 149 34))
+;()
+(new-last-pair nil)
+;5
+(new-last-pair (list 1 2 (list 3 4) 5))
