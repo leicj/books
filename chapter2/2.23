@@ -1,0 +1,18 @@
+(define nil '())
+
+(define (for-each-1 proc items) 
+   (cond ((not (null? items)) 
+          (proc (car items)) 
+          (for-each-1 proc (cdr items)))))  
+
+;1,2,3,
+(for-each (lambda (x)
+            (display x)
+            (display ","))
+          (list 1 2 3))
+(newline)
+;1,2,3,
+(for-each-1 (lambda (x)
+            (display x)
+            (display ","))
+          (list 1 2 3))
