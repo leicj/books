@@ -1,0 +1,12 @@
+(define x (list (list 1 2) (list 3 4)))
+(define nil '())
+(define (fringe x)
+  (define (iter-fringe lst result)
+    (cond ((null? lst) result)
+          ((not (pair? lst)) (cons lst result))
+          (else
+           (iter-fringe (car lst)
+                        (iter-fringe (cdr lst) result)))))
+  (iter-fringe x nil))
+;(1 2 3 4)
+(fringe x)
