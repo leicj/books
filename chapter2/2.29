@@ -1,0 +1,30 @@
+(define (make-mobile left right)
+  (list left right))
+
+(define (make-branch length structure)
+  (list length structure))
+
+(define (left-branch structure)
+  (car structure))
+(define (right-branch structure)
+  (car (cdr structure)))
+
+(define (branch-length structure)
+  (car structure))
+(define (branch-structure structure)
+  (car (cdr branch-structure)))
+
+(define (total-weight mobile)
+  (+ (weight (left-branch mobile))
+     (weight (right-branch mobile))))
+
+(define (weight branch)
+  (define (iter-weight new-branch result)
+    (if (not (pair? (branch-structure new-branch)))
+        (+ result (branch-structure new-branch))
+        (total-weight (branch-structure new-branch))))
+  (iter-weight branch 0))
+
+(define (is-evel mobile)
+  (= (weight (left-branch mobile))
+     (weight (right-branch mobile))))
