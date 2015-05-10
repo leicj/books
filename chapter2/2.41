@@ -1,0 +1,31 @@
+(define nil '())
+(define (enumerate-interval x y)
+  (if (> x y)
+      nil
+      (cons x (enumerate-interval (+ x 1) y))))
+
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+          (accumulate op initial (cdr sequence)))))
+
+(define (flatmap proc seq)
+  (accumulate append nil (map proc seq)))
+
+(define (unique-three-pair s)
+  (flatmap (lambda (x)
+             (flatmap (lambda (y)
+                    (map (lambda (z) (list x y z))
+                         (enumerate-interval 1 (- y 1))))
+                    (enumerate-interval 1 (- x 1))))
+           (enumerate-interval 1 s)))
+
+(define (sum lst)
+  (accumulate + 0 lst))
+(define (sum-three-pair n)
+  (filter (lambda (x) (= n (sum x)))
+          (unique-three-pair n)))
+
+;((5 3 2) (5 4 1) (6 3 1) (7 2 1))
+(sum-three-pair 10)
