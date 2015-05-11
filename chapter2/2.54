@@ -1,0 +1,17 @@
+(define (equal-new? item x)
+  (cond ((and (null? item) (null? x)) #t)
+        ((and (null? item) (not (null? x))) #f)
+        ((and (not (null? item)) (null? x)) #f)
+        (else
+         (cond ((eq? (car item) (car x))
+                (equal-new? (cdr item) (cdr x)))
+               (else
+                #f)))))
+
+(define x '(this is a list))
+(define y '(this is a list))
+(define z '(this (is a) list))
+;#t
+(equal-new? x y)
+;#f
+(equal-new? x z)
