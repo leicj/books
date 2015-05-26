@@ -1,0 +1,24 @@
+(define (make-monitored pro)
+  (let ((amount 0))
+    (define (dispatch m)
+           (cond ((eq? m 'how-many-call?) amount)
+                 ((eq? m 'reset-count) (set! amount 0))
+                 (else (begin (set! amount (+ amount 1))
+                              (pro m)))))
+    dispatch))
+(define s (make-monitored sqrt))
+;10
+(s 100)
+;100
+(s 10000)
+;2
+(s 'how-many-call?)
+(s 'reset-count)
+;0
+(s 'how-many-call?)
+;10
+(s 100)
+;100
+(s 10000)
+;2
+(s 'how-many-call?)
