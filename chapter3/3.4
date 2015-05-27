@@ -1,0 +1,48 @@
+(define (make-account balance right-password)
+  (let ((times 0))
+    (define (withdraw amount)
+      (if (>= balance amount)
+          (begin (set! balance (- balance amount))
+                 balance)
+          "Insufficient funds"))
+    (define (deposit amount)
+      (set! balance (+ balance amount))
+      balance)
+    (define (call-the-cops amount)
+      (newline)
+      (display "call the cops"))
+    (define (error amount)
+      (display "error"))
+    (define (dispatch password m)
+      (cond ((and (eq? m 'withdraw) (eq? password right-password)) withdraw)
+            ((and (eq? m 'deposit) (eq? password right-password)) deposit)
+            ((and (not (eq? password right-password))
+                  (< times 7)) (begin (set! times (+ times 1))
+                                      error))
+            ((and (not (eq? password right-password))
+                  (>= times 7)) call-the-cops)
+            (else error)))
+    dispatch))
+
+(define acc (make-account 100 'secret-password))
+;60
+((acc 'secret-password 'withdraw) 40)
+;Incorrect password secret-other-password
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+((acc 'secret-other-password 'withdraw) 50)
+
+
+the output is:
+60
+errorerrorerrorerrorerrorerrorerror
+call the cops
+call the cops
+call the cops
