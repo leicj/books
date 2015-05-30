@@ -1,0 +1,29 @@
+(define (append1 x y)
+  (if (null? x)
+      y
+      (cons (car x) (append1 (cdr x) y))))
+(define (append! x y)
+  (set-cdr! (last-pair x) y)
+  x)
+(define (last-pair x)
+  (if (null? (cdr x)) x (last-pair (cdr x))))
+
+(define x (list 'a 'b))
+(define y (list 'c 'd))
+(define z (append1 x y))
+;(a b c d)
+z
+;(b)
+(cdr x)
+;(a b)
+x
+
+(define w (append! x y))
+;(a b c d)
+w
+;(b c d)
+(cdr x)
+;(a b c d)
+x
+
+so for append1, x is not change, but for append!, x have been changed.
