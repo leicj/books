@@ -1,0 +1,20 @@
+(define (last-pair x)
+  (if (null? (cdr x)) x (last-pair (cdr x))))
+(define (make-cycle x)
+  (set-cdr! (last-pair x) x)
+  x)
+(define z (make-cycle '(a b c)))
+
+(define (is-cycle z)
+  (let ((cycle-identity '()))
+    (define (iter remain-list)
+      (cond ((null? remain-list)
+             #f)
+            ((eq? cycle-identity (car remain-list))
+             #t)
+            (else
+             (set-car! remain-list cycle-identity)
+             (iter (cdr remain-list)))))
+    (iter z)))
+;#t
+(is-cycle z)
