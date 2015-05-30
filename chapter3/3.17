@@ -1,0 +1,29 @@
+(define (count-pairs x)
+  (let ((encountered '()))
+    (define (helper x)
+      (if (or (not (pair? x)) (memq x encountered))
+          0
+          (begin
+            (set! encountered (cons x encountered))
+            (+ (helper (car x))
+               (helper (cdr x))
+               1))))
+    (helper x)))
+
+;3
+(count-pairs '(a b c))
+
+(define second (cons 'a 'b)) 
+(define third (cons 'a 'b)) 
+(define first (cons second third)) 
+(set-car! third second) 
+;3
+(count-pairs first)
+  
+(define third (cons 'a 'b)) 
+(define second (cons third third)) 
+(define first (cons second second)) 
+;3
+(count-pairs first)
+
+
