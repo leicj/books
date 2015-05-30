@@ -1,0 +1,43 @@
+(define (in-right-password-list password right-password-list)
+  (define (iter pwd-lst)
+    (if (null? pwd-lst)
+        #f
+        (if (eq? password (car pwd-lst))
+            #t
+            (iter (cdr pwd-lst)))))
+  (iter right-password-list))
+
+(define (make-account balance right-password-list)
+  (define (withdraw amount)
+    (if (>= balance amount)
+        (begin (set! balance (- balance amount))
+               balance)
+        "Insufficient funds"))
+  (define (deposit amount)
+    (set! balance (+ balance amount))
+    balance)
+  (define (dispatch password m)
+    (cond ((and (eq? m 'withdraw) (in-right-password-list password right-password-list)) withdraw)
+          ((and (eq? m 'deposit) (in-right-password-list password right-password-list)) deposit)
+          ((eq? m 'eq-password) (in-right-password-list password right-password-list))
+          ((eq? m 'add-password) (set! right-password-list (cons password right-password-list)))
+          ((not (in-right-password-list password right-password-list)) (error "Incorrect password" password))
+          (else (error "Unknown request: MAKE-ACCOUNT" m))))
+  dispatch)
+
+(define (make-joint user old-password new-password)
+  (if (user old-password 'eq-password)
+      (begin (user new-password 'add-password)
+             user)
+      (error ("error password" old-password))))
+
+(define peter-acc (make-account 100 (list 'secret-password)))
+(define paul-acc (make-joint peter-acc 'secret-password 'new-password))
+;60
+((peter-acc 'secret-password 'withdraw) 40)
+;50
+((paul-acc 'new-password 'withdraw) 10)
+;30
+((peter-acc 'secret-password 'withdraw) 20)
+;10
+((paul-acc 'new-password 'withdraw) 20)
