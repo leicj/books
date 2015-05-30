@@ -1,0 +1,34 @@
+(define (count-pairs x)
+  (if (not (pair? x))
+       0
+       (begin (display "---")
+              (display x)
+              (display ":")
+              (display (car x))
+              (display ":")
+              (display (cdr x))
+         (+ (count-pairs (car x))
+          (count-pairs (cdr x))
+          1))))
+(count-pairs '(a b c))
+
+(define second (cons 'a 'b)) 
+(define third (cons 'a 'b)) 
+(define first (cons second third)) 
+(set-car! third second) 
+(count-pairs first)  
+first
+
+(define third (cons 'a 'b))
+(define second (cons third third))
+(define first (cons second second))
+(count-pairs first)
+first
+
+
+the output is:
+---(a b c):a:(b c)---(b c):b:(c)---(c):c:()3
+---((a . b) (a . b) . b):(a . b):((a . b) . b)---(a . b):a:b---((a . b) . b):(a . b):b---(a . b):a:b4
+((a . b) (a . b) . b)
+---(((a . b) a . b) (a . b) a . b):((a . b) a . b):((a . b) a . b)---((a . b) a . b):(a . b):(a . b)---(a . b):a:b---(a . b):a:b---((a . b) a . b):(a . b):(a . b)---(a . b):a:b---(a . b):a:b7
+(((a . b) a . b) (a . b) a . b)
