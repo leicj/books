@@ -1,0 +1,10 @@
+(define (ripple-carry A B S C)
+  (define (iter a_list b_list s_list c)
+    (if (and (null? a_list) (null? b_list) (null? s_list))
+        'ok
+        (let ((c-out (make-wire)))
+             (begin 
+               (set-signal! c-out C)
+               (full-adder (car a_list) (car b_list) c-out (car s_list) C)
+               (iter (cdr a_list) (cdr b_list) (cdr s_list) (get-signal C))))))
+  (iter A B S (get-signal C)))
