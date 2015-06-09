@@ -1,0 +1,14 @@
+1. 10, 20, 30 after exchange, will be:
+10, 20, 30
+10, 30, 20
+20, 10, 30
+20, 30, 10
+30, 10, 20
+30, 20, 10
+
+2. 10 <-> 20 <-> 30
+if we exchange 10, 20, and other process exchange 20 and 30, so:
+10 <-> 20 --> 20, 10
+but when 10 <-> 20, we exchange 20 <-> 30
+30 <-> 20, then 20 is change to 10, 
+so the result is: 20, 10, 10
