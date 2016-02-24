@@ -1,0 +1,248 @@
+二叉搜索树: 设x是二叉搜索树中的一个结点.如果y是x左子树中的一个结点,那么y.key <= x.key.如果y是x右子树中的一个结点,那么y.key >= x.key.
+中序遍历的伪代码如下:
+INORDER-TREE-WALK(x)
+	if x != NIL:
+		INORDER-TREE-WALK(x.left)
+		print x.key
+		INORDER-TREE-WALK(x.right)
+查找的伪代码如下:
+递归版本:
+TREE-SEARCH(x, k)
+	if x == NIL or k == x.key
+		return x
+	if k < x.key
+		return TREE-SEARCH(x.left, k)
+	else return TREE-SEARCH(x.right, k)
+迭代版本:
+ITERATIVE-TREE-SEARCH(x, k)
+	while x != NIL and k != x.key:
+		if k < x.key:
+			x = x.left
+		else x = x.right
+	return x
+查找树的最大最小结点:
+TREE-MINIMUM(x)
+	while x.left != NIL
+		x = x.left
+	return x
+TREE-MAXIMUM(x)
+	while x.right != NIL:
+		x = x.right
+	return x
+后继节点: 结点x的后继是大于x.key的最小关键字的结点.
+如果此结点有右子树,则为右子树的最小节点.否则后继节点为此结点的最小左父节点.
+TREE-SUCCESSOR(x)
+	if x.right != NIL:
+		return TREE-MINIMUM(x.right)
+	y = x.p
+	while y != NULL and x == y.right:
+		x = y
+		y = y.p
+	return y
+插入结点的伪代码如下:
+TREE-INSERT(T, z)
+	y = NIL
+	x = T.root
+	while x != NIL:
+		y = x
+		if z.key < x.key:
+			x = x.left
+		else:
+			x = x.right
+	z.p = y
+	if y == NIL:
+		T.root = z
+	else if z.key < y.key:
+		y.left = z
+	else y.right = z
+删除结点的操作略显复杂(具体查看算法导论第十二章),描述如下:
+1. 如果z没有孩子结点,那么只是简单的将它删除,并修改它的父节点,用NIL作为孩子来替换z.
+2. 如果z只有一个孩子,那么将这个孩子提升到树中z的位置上,并修改z的父节点,用z的孩子来替换z.
+3. 如果z有两个孩子,那么找z的后继y(一定在z的右子树中),并让y占据树中z的位置.z的原来右子树部分成为y的新的右子树,并且z的左子树成为y的新的左子树.
+	为了在二叉搜索树内移动子树,定义一个子过程TRANSPLANT,它是用另一棵子树替换一棵子树并成为其双亲的孩子结点.当TRANSPLANT用一棵以v为根的子树来替换一棵以u为根的子树时,结点u的双亲就变为结点v的双亲,并且最后v成为u的双亲的相应孩子.
+伪代码如下:
+TRANSPLANT(T, u, v)
+	if u.p == NIL:
+		T.root = v
+	elseif u == u.p.left:
+		u.p.left = v
+	else u.p.right = v
+	if u != NIL:
+		v.p = u.p
+删除的伪代码如下:
+TREE-DELETE(T, z)
+	if z.left == NIL:
+		TRANSPLANT(T, z, z.right)
+	elseif z.right == NIL:
+		TRANSPLANT(T, z, z.left)
+	else y = TREE-MINIMUM(z.right)
+		if y.p != z:
+			TRANSPLANT(T, y, y.right)
+			y.right = z.right
+			y.right.p = y
+		TRANSPLANT(T, z, y)
+		y.left = z.left
+		y.left.p = y
+
+具体实现C语言版:
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+typedef struct TREE {
+    int value;
+    struct TREE *left;
+    struct TREE *right;
+    struct TREE *parent;
+} Tree;
+
+void inorderTreeWalk(Tree *tree)
+{
+    if (tree != NULL) {
+        inorderTreeWalk(tree->left);
+        printf("%d ", tree->value);
+        inorderTreeWalk(tree->right);
+    }
+}
+
+void prevorderTreeWalk(Tree *tree)
+{
+    if (tree != NULL) {
+        printf("%d ", tree->value);
+        prevorderTreeWalk(tree->left);
+        prevorderTreeWalk(tree->right);
+    }
+}
+
+void nextorderTreeWalk(Tree *tree)
+{
+    if (tree != NULL) {
+        nextorderTreeWalk(tree->left);
+        nextorderTreeWalk(tree->right);
+        printf("%d ", tree->value);
+    }
+}
+
+Tree *treeMinimum(Tree *tree)
+{
+    while (tree->left) {
+        tree = tree->left;
+    }
+    return tree;
+}
+
+Tree *treeMaximum(Tree *tree)
+{
+    while (tree->right) {
+        tree = tree->right;
+    }
+    return tree;
+}
+
+Tree *treeSuccessor(Tree *tree)
+{
+    Tree *y = (Tree *)malloc(sizeof(Tree *));
+    if (tree->right) {
+        return treeMinimum(tree->right);
+    }
+    y = tree->parent;
+    while (y && tree == y->right) {
+        tree = y;
+        y = y->parent;
+    }
+    return y;
+}
+
+void treeInsert(Tree *tree, Tree *z)
+{
+    Tree *y = NULL;
+    Tree *x = tree->left;
+    while (x) {
+        y = x;
+        if (z->value < x->value) {
+            x = x->left;
+        } else {
+            x = x->right;
+        }
+    }
+    z->parent = y;
+    if (y == NULL) {
+        z->parent = tree;
+        tree->left = z;
+    } else if (z->value < y->value) {
+        y->left = z;
+    } else {
+        y->right = z;
+    }
+}
+
+void transplant(Tree *tree, Tree *u, Tree *v)
+{
+    if (u->parent == NULL) {
+        tree = v;
+    } else if (u == u->parent->left) {
+        u->parent->left = v;
+    } else {
+        u->parent->right = v;
+    }
+    if (v != NULL) {
+        v->parent = u->parent;
+    }
+}
+
+void treeDelete(Tree *tree, Tree *z)
+{
+    Tree *y = NULL;
+    if (z->left == NULL) {
+        transplant(tree, z, z->right);
+    } else if (z->right == NULL) {
+        transplant(tree, z, z->left);
+    } else {
+        y = treeMinimum(z->right);
+        if (y->parent != z) {
+            transplant(tree, y, y->right);
+            y->right = z->right;
+            y->right->parent = y;
+        }
+        transplant(tree, z, y);
+        y->left = z->left;
+        y->left->parent = y;
+    }
+}
+
+int main(void)
+{
+    Tree *tree = (Tree *)malloc(sizeof(Tree *));
+    tree->left = tree->right = tree->parent = NULL;
+    tree->value = INT_MIN;
+    Tree t1, t2, t3, t4, t5, t6, t7, t8;
+    t1.left = t1.right = t2.left = t2.right = t3.left = t3.right = t4.left = t4.right = NULL;
+    t5.left = t5.right = t6.left = t6.right = t7.left = t7.right = t8.left = t8.right = NULL;
+    t1.value = 12;
+    t2.value = 5;
+    t3.value = 18;
+    t4.value = 2;
+    t5.value = 9;
+    t6.value = 15;
+    t7.value = 19;
+    t8.value = 17;
+
+    treeInsert(tree, &t1);
+    treeInsert(tree, &t2);
+    treeInsert(tree, &t3);
+    treeInsert(tree, &t4);
+    treeInsert(tree, &t5);
+    treeInsert(tree, &t6);
+    treeInsert(tree, &t7);
+    treeInsert(tree, &t8);
+
+    inorderTreeWalk(tree->left);
+    printf("\n");
+
+    treeDelete(tree->left, &t1);
+    inorderTreeWalk(tree->left);
+    printf("\n");
+
+    return 0;
+}
+

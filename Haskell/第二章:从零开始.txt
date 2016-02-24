@@ -1,0 +1,148 @@
+1. 基本运算符
++ - * / == /=(不等于) && || not
+
+2. 调用的函数是以空格进行分割,而非括号
+*Main> min (min 1 2) (min 3 4)
+1
+括号的作用是调整求值的顺序.
+
+3. 文件名是以hs结尾,并且在编辑器中以:l(小写字母l)进行加载.
+baby.hs:
+doubleMe x = x + x
+doubleUs x y = x * 2 + y * 2
+doubleSamllNumber x = (if x > 100 then x else x * 2) + 1
+
+在编辑器中操作如下:
+*Main> doubleMe 2
+4
+*Main> doubleUs 2 4
+12
+*Main> doubleSamllNumber 45
+91
+*Main> doubleUs (doubleMe 2) (doubleMe 3)
+20
+备注: if的else部分不可省略.
+
+4. list操作(存储同类型的数据)
+1) 使用let对一个变量进行赋值
+*Main> let arr = [1, 2, 3, 4, 5]
+*Main> arr
+[1,2,3,4,5]
+2) 使用++进行两个list的合并(字符串本身就是一个字符list)
+*Main> "hello" ++ " world"
+"hello world"
+3) 使用:在前端插入单个元素
+*Main> '?':"hello"
+"?hello"
+不能写:"?":"hello",因为"?"是一个list,而非单个元素.
+4) head返回list的首个元素,tail返回list除去头部之后的部分.last返回最后一个元素.init返回除去最后一个元素的部分.
+*Main> head "hello"
+'h'
+*Main> tail "hello"
+"ello"
+*Main> last "hello"
+'o'
+*Main> init "hello"
+"hell"
+5) length返回list的长度
+*Main> length "hello"
+5
+6) null判断list是否为空
+*Main> null []
+True
+*Main> null "hello"
+False
+7) reverse将list反转
+*Main> reverse "hello"
+"olleh"
+8) take返回list的前几个元素, drop删除前几个元素.
+*Main> take 3 "hello"
+"hel"
+*Main> drop 3 "hello"
+"lo"
+9) maximum返回list的最大元素,minimum返回最小的元素
+*Main> maximum [1, 2, 3, 4, 5]
+5
+*Main> minimum [1, 2, 3, 4, 5]
+1
+10) sum返回list中所有元素的和,product返回list中所有元素的积
+*Main> sum [1, 2, 3, 4, 5]
+15
+*Main> product [1, 2, 3, 4, 5]
+120
+11) elem判断一个元素是否包含于一个list,以中缀函数调用它.
+*Main> 1 `elem` [1, 2, 3, 4]
+True
+*Main> elem 1 [1, 2, 3, 4]
+True
+
+5. range操作
+1) 获取1~20的数字
+*Main> [1..20]
+[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+*Main> ['a'..'Z']
+""
+*Main> ['a'..'z']
+"abcdefghijklmnopqrstuvwxyz"
+2) 指定具体的间隔
+*Main> [2,4..20]
+[2,4,6,8,10,12,14,16,18,20]
+*Main> [0.1,0.3..1]
+[0.1,0.3,0.5,0.7,0.8999999999999999,1.0999999999999999]
+所以,避免在range中使用浮点数
+3) 获取前24个13的倍数,应该使用take 24 [13, 26..],而非[13,26..24*13]
+因为Haskell是惰性求值的.
+4) cycle会对一个list无限循环,我们可以调用take来获取无限list的前几个元素.而repeat重复单个元素.
+*Main> take 10 (cycle [1, 2, 3])
+[1,2,3,1,2,3,1,2,3,1]
+*Main> take 10 (repeat 5)
+[5,5,5,5,5,5,5,5,5,5]
+
+6. 列表推导式
+1) 获取前10个偶数
+*Main> [x * 2 | x <- [1..10]]
+[2,4,6,8,10,12,14,16,18,20]
+2) 增加过滤条件
+*Main> [x * 2 | x <- [1..10], x * 2 >= 12]
+[12,14,16,18,20]
+我们在baby.js中写下如下函数:
+boomBangs xs = [if x < 10 then "BOOM!" else "BANG!" | x <- xs, odd x]
+并且调用:
+*Main> :l baby
+[1 of 1] Compiling Main             ( baby.hs, interpreted )
+Ok, modules loaded: Main.
+*Main> boomBangs [7..15]
+["BOOM!","BOOM!","BANG!","BANG!","BANG!"]
+我们甚至可以编写多个条件:
+*Main> [x | x <- [10..20], x /= 13, x /= 15, x /= 19]
+[10,11,12,14,16,17,18,20]
+3) 多个list的操作
+*Main> [x * y | x <- [2,5,10], y <- [8, 10, 11]]
+[16,20,22,40,50,55,80,100,110]
+4) 去除字符串中所有的非大写字母
+*Main> [c | c <- "heLLo", elem c ['A'..'Z']]
+"LL"
+
+7. 元祖
+1) fst返回一个序对的首项,snd返回尾项
+*Main> fst (8, 11)
+8
+*Main> snd (8, 11)
+11
+2) zip生成一组序对的list
+*Main> zip [1, 2, 3, 4, 5] [5, 5, 5, 5, 5]
+[(1,5),(2,5),(3,5),(4,5),(5,5)]
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,47 @@
+二分查找法:
+int binarySearch(const int A[], int x, int len)
+{
+	int low, mid, high;
+
+	low = 0;
+	high = len - 1;
+	while (low <= high) {
+		mid = (low + high) / 2;
+		if (A[mid] < x) {
+			low = mid + 1;
+		} else if (A[mid] > x) {
+			high = mid - 1;
+		} else {
+			return mid;
+		}
+	}
+
+	return -1;
+}
+
+欧里几何算法:求最大公因数
+int gcd(int m, int n)
+{
+	int rem;
+	while (n > 0) {
+		rem = m % n;
+		m = n;
+		n = rem;
+	}
+	return m;
+}
+
+幂的运算:
+int pow(int x, int n)
+{
+	if (0 == n) {
+		return 1;
+	} else if (1 == n) {
+		return x;
+	}
+	if (isEven(n)) {
+		return pow(x * x, n / 2);
+	} else {
+		return pow(x * x, n / 2) * x;
+	}
+}

@@ -1,0 +1,56 @@
+计数排序
+计数排序假设n个输入元素中的每一个都是在0到k区间内的一个整数.
+计数排序的基本思想是: 对每一个输入元素x,确定小于x的元素个数.利用这一信息,就可以直接把x放到它在输出数组中的位置上了.
+伪代码如下(假设输入是一个数组A[1..n], A.length = n.B[1..n]存放排序的输出,C[0..k]提供临时存储空间):
+COUNTING-SORT(A, B, k)
+	for i = 0 to k:
+		C[i] = 0
+	for j = 1 to A.length:
+		C[A[j]] = C[A[j]] + 1
+	for i = 1 to k:
+		C[i] = C[i] + C[i - 1]
+	for j = A.length downto 1:
+		B[C[A[j]]] = A[j]
+		C[A[j]] = C[A[j]] - 1
+具体实现C语言版:
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void count_sort(int A[], int B[], int len, int k)
+{
+    int i = 0;
+    int *C = (int *)malloc(sizeof( int )*k);
+    memset(C, 0, sizeof(int) * k);
+    for (i = 0; i < len; i++) {
+        C[A[i]] += 1;
+    }
+    for (i = 1; i < k; i++) {
+        C[i] += C[i - 1];
+    }
+    for (i = 0; i < k; i++) {
+        C[i] -= 1;
+    }
+
+    for (i = len - 1; i >= 0; i--) {
+        B[C[A[i]]] = A[i];
+        C[A[i]] -= 1;
+    }
+}
+
+int main(void)
+{
+     int i = 0;
+     int A[8] = {2, 5, 3, 0, 2, 3, 0, 3};
+     int B[8];
+     memset(B, 0, sizeof(int) * 8);
+     count_sort(A, B, 8, 6);
+
+     for (i = 0; i < 8; i++) {
+          printf("%d ", B[i]);
+     }
+     printf("\n");
+
+     return 0;
+}
+

@@ -1,0 +1,80 @@
+n阶矩阵的乘法伪代码如下:
+SQUARE-MATRIX-MULTIPLY(A, B)
+    n = A.rows
+    for i = 1 to n
+        for j = 1 to n
+            c[i][j] = 0
+            for k = 1 to n
+                c[i][j] = c[i][j] + A[i][k] * B[k][j]
+
+具体实现Python版本:(C语言的二维数组不知道如何传递......)
+#!/usr/bin/env python
+# encoding: utf-8
+
+def squareMatrixMultiply(A, B, C, n):
+    for i in range(n):
+        for j in range(n):
+            C[i][j] = 0
+            for k in range(n):
+                C[i][j] += A[i][k] * B[k][j]
+
+if __name__ == '__main__':
+    A = [[2,3],[4,5]]
+    B = [[2,3],[4,5]]
+    C = [[0,0],[0,0]]
+    squareMatrixMultiply(A, B, C, 2)
+
+    print C
+
+这里复杂度为n^3.而通过Strassen算法,复杂度可降低为n^(lg7).
+
+Strassen算法的核心思想是令递归树稍微不name茂盛一些,即只递归进行7次而不是8次n/2*n/2矩阵的乘法.减少一次矩阵乘法带来的代价可能是额外几次n/2*n/2矩阵的加法,但只是常数次.
+1. 将输入矩阵A,B和输出矩阵C分解为n/2*n/2的子矩阵.
+2. 创建10个n/2*n/2的矩阵S1,S2,...S10,每个矩阵保存步骤1中创建的两个子矩阵的和或差.
+3. 用步骤1中创建的子矩阵和步骤2中创建的10个矩阵,递归的计算7个矩阵积P1,P2,...,P7.每个矩阵P都是n/2*n/2的.
+4. 通过P矩阵的不同组合进行加减运算,计算出结果矩阵C的子矩阵C11,C12,C21,C22.
+
+具体的实例如下:
+#include <stdio.h>
+
+
+int main(void)
+{
+    int i = 0, j = 0;
+    int A[2][2] = {2, 3, 4, 5};
+    int B[2][2] = {2, 3, 4, 5};
+    int C[2][2];
+    int S1 = B[0][1] - B[1][1];
+    int S2 = A[0][0] + A[0][1];
+    int S3 = A[1][0] + A[1][1];
+    int S4 = B[1][0] - B[0][0];
+    int S5 = A[0][0] + A[1][1];
+    int S6 = B[0][0] + B[1][1];
+    int S7 = A[0][1] - A[1][1];
+    int S8 = B[1][0] + B[1][1];
+    int S9 = A[0][0] - A[1][0];
+    int S10 = B[0][0] + B[0][1];
+
+    int P1 = A[0][0] * S1;
+    int P2 = S2 * B[1][1];
+    int P3 = S3 * B[0][0];
+    int P4 = S4 * A[1][1];
+    int P5 = S5 * S6;
+    int P6 = S7 * S8;
+    int P7 = S9 * S10;
+
+    C[0][0] = P5 + P4 - P2 + P6;
+    C[0][1] = P1 + P2;
+    C[1][0] = P3 + P4;
+    C[1][1] = P5 + P1 - P3 - P7;
+
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+            printf("%d ", C[i][j]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+

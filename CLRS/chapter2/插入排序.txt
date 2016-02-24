@@ -1,0 +1,50 @@
+
+插入排序
+基础思想为: 假设有一个数组为A[n],那么我们预先保证A[1]是排序的,然后A[1],A[2]是有序的(将A[2]同A[1]比较),A[1],A[2],A[3]是有序的(将A[3]同A[1],A[2]比较).依次类推,直到整个A[n]是有序的.
+C语言版(2-1.c):
+#include <stdio.h>
+
+int main(void)
+{
+    int arr[] ={5,2,4,6,1,3};
+    int len = 6;
+    int i = 0, j = 0;
+    int key;
+    for (j = 1; j < len; j++) {
+        key = arr[j];
+        i = j - 1;
+        while (i >= 0 && arr[i] > key) {
+            arr[i + 1] = arr[i];
+            i -= 1;
+        }
+        arr[i+ 1] = key;
+    }
+
+    for (i = 0; i < len; i++) {
+         printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
+
+习题2.1-3的伪代码如下:
+for j = 1 to A.length:
+    if A[j] == v:
+        return j
+return NIL
+
+习题2.1-4的伪代码如下:
+flag = 0
+for i = 1 to n:
+    sum = A[i] + B[i] + flag
+    if sum < 2:
+        C[i] = sum
+    elif sum == 2:
+	C[i] = 0
+	flag = 1
+    else:
+	C[i] = 1
+	flag = 1
+
+C[n + 1] = flag

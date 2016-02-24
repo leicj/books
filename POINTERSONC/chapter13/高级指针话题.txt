@@ -1,0 +1,74 @@
+1. 高级声明
+int f;	//一个整型变量
+int *f;	//一个指向整型的指针
+int *f(); //f是一个函数,返回值类型是一个指向整型的指针
+int (*f)(); //f为函数指针,它所指向的函数返回一个整型值.
+int *(*f)(); //f为函数指针,它所指向的函数返回一个指向整型的指针.
+int *f[]; //f为一个数组,它的元素类型是指向整型的指针.
+
+函数指针:
+	对函数指针执行间接访问之前需要初始化,如下所示:
+int f(int);
+int (*pf)(int) = &f;
+在函数指针被声明并且初始化之后,我们可以使用三种方式调用函数:
+int ans;
+ans = f(25);
+ans = (*pf)(25);
+ans = pf(25);
+函数指针的用途之一是: 回调函数
+	对于链表,如果我们需要比较的值,可能是整型或者字符串,或者其他类型怎么办?我们可以提供一个比较函数:
+Node *search_list(Node *node, void const *value, int (*compare)(void const *, void const *))
+{
+	while (NULL != node) {
+		if (compare(&node->value, value) == 0) {
+			break;
+		}
+		node = node->link;
+	}
+	return node;
+}
+
+int compare_ints(void const *a, void const *b)
+{
+	if (*(int *)a == *(int *)b) {
+		return 0;
+	}
+	return 1;
+}
+
+desired_node = search_list(root, &desired_value, compare_ints);
+desired_node = search_list(root, &desired_value, strcmp);
+函数指针的用途之二是: 转移表
+假设有一个计算程序编写如下:
+switch (oper) {
+	case ADD:
+		result = add(op1, op2);
+		break;
+	case SUB:
+		result = sub(op1, op2);
+		break;
+	case MUL:
+		result = mul(op1, op2);
+		break;
+	case DIV:
+		result = div(op1, op2);
+		break;
+	......
+}
+假设有上百个操作符,则switch会非常的长.
+	我们可以使用函数指针来优化代码:
+double add(double, double);
+double sub(double, double);
+double mul(double, double);
+double div(double, double);
+...
+double (*oper_func[])(double, double) = {
+	add, sub, mul, div, ...
+};
+result = oper_func[oper](op1, op2);
+
+字符串常量
+	"xyz" + 1 = "y", 因为"xyz"是一个指针.
+	"xyz"[2] = "z"
+	"0123456789ABCDEF"[value % 16],显示十六进制数
+

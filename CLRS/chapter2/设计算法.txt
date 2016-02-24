@@ -1,0 +1,108 @@
+分治法: 将原问题分解为几个规模较小但类似于原问题的子问题,递归的求解这些子问题,然后再合并这些子问题的解来建立原问题的解.
+归并排序:
+分解: 分解待排序的n个元素的序列成各具有n/2个元素的两个子序列.
+解决: 使用归并排序递归的排序两个子序列
+合并: 合并两个已排序的子序列以产生已排序的答案.
+当待排序的序列长度为1时,递归”开始回升”.
+
+归并排序算法的关键操作是”合并”步骤中两个已排序序列的合并,通过调用MERGE(A, p, q, r)来完成合并,我们需假设子数组A[p...q]和A[q+1...r]都已经排序.
+MERGE的伪代码如下:
+MERGE(A, p, q, r)
+    n1 = q - p + 1
+    n2 = r - q
+    for i = 1 to n1:
+	L[i] = A[p + i - 1]
+    for j = 1 to n2:
+	R[j] = A[q + j]
+    L[n1 + 1] = ∞
+    R[n2 + 1] = ∞
+    i = 1
+    j = 1
+    for k = p to r:
+	if L[i] <= R[j]:
+	    A[k] = L[i]
+	    i = i + 1
+        else:
+	    A[k] = R[j]
+	    j = j + 1
+
+而主程序如下:
+MERGE-SORT(A, p, r)
+    if p < r:
+	q = (p + r) / 2
+	MERGE-SORT(A, p, q)
+	MERGE-SORT(A, q + 1, r)
+	MERGE(A, p, q, r)
+
+实际的C语言版代码如下:
+#include <stdio.h>
+#include <stdlib.h>
+
+void MERGE(int A[], int p,int q, int r)
+{
+    int n1 = q - p + 1;
+    int n2 = r - q;
+    int i = 0, j = 0, k = 0;
+
+    int *L = malloc(n1);
+    int *R = malloc(n2);
+
+    printf("L:");
+    for (i = 0; i < n1; i++) {
+        L[i] = A[p + i];
+        printf("%d ", L[i]);
+    }
+    printf("R:");
+    for (i = 0; i < n2; i++) {
+        R[i] = A[q + i + 1];
+        printf("%d ", R[i]);
+    }
+
+    i = j = 0;
+    for (k = p; k <= r; k++) {
+        if (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+                A[k] = L[i];
+                i += 1;
+            } else {
+                A[k] = R[j];
+                j += 1;
+            }
+        } else {
+            for (; i < n1; i++) {
+                 A[k] = L[i];
+            }
+            for (; j < n2; j++) {
+                A[k] = R[j];
+            }
+        }
+    }
+}
+
+void MERGESORT(int A[], int p, int r)
+{
+    int q = 0;
+    if (p < r) {
+        q = (p + r) / 2;
+        MERGESORT(A, p, q);
+        MERGESORT(A, q + 1, r);
+        MERGE(A, p, q, r);
+    }
+}
+
+int main(void)
+{
+    int arr[] = {5, 2, 4, 7, 1, 3, 2, 6};
+    int len = 8;
+    int i = 0;
+
+    MERGESORT(arr, 0, len - 1);
+
+    printf("\n");
+    for (i = 0; i < len; i++) {
+         printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    return 0;
+}

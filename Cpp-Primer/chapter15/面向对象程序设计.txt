@@ -1,0 +1,147 @@
+15.1 OOP:概述
+	面向对象程序设计的核心思想是数据抽象，继承和动态绑定。通过使用数据抽象，我们可以将类的接口与实现分离。使用继承，可以定义相似的类型并对其相关关系建模；使用动态绑定，可以在一定程度上忽略相似类型的区别，而以统一的方式使用它们的对象。
+继承
+	通过继承联系在一起的类构成一种层次关系。通常在层次关系的根部有一个基类，其他类则直接或间接的从基类继承而来。这些继承得到的类称为派生类。基类负责定义在层次关系中所有类共同拥有的成员，而每个派生类定义各自特有的成员。
+class Quote{
+public:
+	std::string isbn() const;
+	virtual double net_price(std::size_t n) const;
+};
+class Bulk_quote : public Quote {
+public:
+	double net_price(std::size_t) const override;
+};
+	在C++语言中，基类将类型相关的函数与派生类不做改变直接继承的函数区分对待。对于某些函数，基类希望它的派生类各自定义适合自身的版本，此时基类就将这些函数声明成虚函数。
+	C++新标准中允许派生类显式的注明它将使用哪个成员函数改写基类的虚函数，具体的措施是在该函数的形参列表之后增加一个override关键字。
+动态绑定
+	通过使用动态绑定，我们能用同一段代码分别处理Quote和Bulk_quote的对象：
+double print_total(ostream &os, const Quote &item, size_t n)
+{
+	// ...
+}
+print_total(cout, basic, 20); 	//调用Quote
+print_total(cout, bulk, 20); 	//调用Bulk_quote
+
+15.2 定义基类和派生类
+15.2.1 定义基类
+class Quote{
+public:
+    Quote() = default;
+    Quote(const string &book, double Sales_price) :
+        bookNo(book), price(Sales_price) {}
+    string isbn() const { return bookNo; }
+    virtual double net_price(size_t n) const
+    { return n * price; }
+    virtual ~Quote() = default;
+private:
+    string bookNo;
+protected:
+    double price = 0.0;
+};
+成员函数与继承(
+	派生类可以继承其基类的成员，然而当遇到如net_price这样与类型相关的操作时，派生类必须对其重新定义。换句话说，派生类需要对这些操作提供自己的新定义以覆盖(override)从基类继承而来的旧定义。
+	在C++语言中，基类必须将它的两种成员函数区分开来： 一种是基类希望其派生类进行覆盖的函数；另一种是基类希望派生类直接继承而不要改变的函数。对于前者，基类通常将其定义为虚函数。当我们使用指针或引用调用虚函数时，该调用将被动态绑定。根据引用或指针所绑定的对象类型不同，该调用可能执行基类的版本，也可能执行某个派生类的版本。
+	基类通过在其成员函数的声明语句之前加上关键字virtual使得该函数执行动态绑定。任何构造函数之外的非静态函数都可以是虚函数。关键字virtual只能出现在类内部的声明语句之前而不能用于类外部的函数定义。如果基类把一个函数声明成虚函数，则该函数在派生类中隐式的也是虚函数。
+	成员函数如果没被声明为虚函数，则其解析过程发生在编译时而非运行时。
+15.2.2 定义派生类
+	派生类必须将其继承而来的成员函数需要覆盖的哪些重新声明(虚拟函数).
+class Bulk_quote : public Quote {
+public:
+    Bulk_quote() = default;
+    Bulk_quote(const string &, double, size_t, double);
+    double net_price(size_t) const override;
+private:
+    size_t min_qty = 0;
+    double discount = 0.0;
+};
+派生类中的虚函数
+	派生类经常覆盖它继承的虚函数。如果派生类没有覆盖其基类中的某个虚函数，则该虚函数的行为类似于其他的普通成员，派生类会直接继承其在基类中的版本。
+派生类对象及派生类向基类的类型转换
+	一个派生类对象包含多个组成部分： 一个含有派生类子集定义的(非静态)成员的子对象，以及一个与该派生类继承的基类对应的子对象。因为在派生类中含有其基类对应的组成部分，所以我们能把派生类的对象当成基类对象来使用，而且我们也能将基类的指针或引用绑定到派生类对象中的基类部分上。
+派生类构造函数
+	尽管在派生类对象中含有从基类继承而来的成员，但是派生类并不能直接初始化这些成员。派生类必须使用基类的构造函数来初始化它的基类部分。
+	每个类控制它子集的成员初始化过程。
+Bulk_quote::Bulk_quote(const string &book, double p,
+        size_t qty, double disc) :
+    Quote(book, p), min_qty(qty), discount(disc) {}
+继承与静态成员
+	如果基类定义了一个静态成员，则在整个继承体系中只存在该成员的唯一定义(静态成员函数不可继承)。
+class Base {
+public:
+	static void statmem();
+};
+class Derived : public Base {
+	void f(const Derived& derived_obj) {
+		Base::statmem();
+		Derived:statmem();
+		derived_obj.statmem();
+		statmem();
+	}
+};
+被用作基类的类
+	如果我们想将某个类用作基类，则该类必须已经定义而非仅仅声明，所以一个类也不能派生它本身。
+防止继承的发生
+	C++新标准提供过了一种防止继承发生的方法，即在类名后跟一个关键字final;
+15.2.3 类型转换与继承
+	可以将基类的指针或引用绑定到派生类对象上有一层极为重要的含义：当使用基类的引用(或指针)时，实际上我们并不清楚该引用(或指针)所绑定对象的真实类型。该对象可能是基类的对象，也可能是派生类的对象。
+静态类型与动态类型
+	表达式的静态类型在编译时总是已知的，它是变量声明时的类型或表达式生成的类型；动态类型则是变量或表达式表示的内存中的对象的类型。动态类型直到运行时才可知。
+	不存在从基类向派生类的隐式类型转换，因为基类并不包含派生类独有的数据部分。
+
+15.3 虚函数
+	当我们使用基类的引用或指针调用一个虚成员函数时会执行动态绑定，但是我们必须为每一个虚函数都提供定义，而不管它是否被用到了，这是因为连编译器也无法确定到底会使用哪个虚函数。
+	一个派生类的函数如果覆盖了某个继承而来的虚函数，则它的形参类型必须与被它覆盖的基类函数完全一致。
+	但是，如果派生类编写的函数并没有覆盖掉基类的虚函数(例如形参列表写错了)，则编译器并不会报错，它会认为派生类新定义了一个函数。我们可以在派生类中的函数中增加override，来强制表明此函数是覆盖基类的虚函数。
+	而基类的函数可以将函数指定为final，来表明此函数不可被覆盖。
+
+15.4 抽象基类
+纯虚函数： 我们可以将一个函数定义为纯虚函数，从而无需定义它。
+	含有(或者未经覆盖直接继承)纯虚函数的类是抽象基类。抽象基类负责定义接口，而后续的其他类可以覆盖该接口。我们不能直接创建一个抽象基类的对象。而派生类必须实现基类的纯虚函数，否则派生类依旧为抽象类。
+
+15.5 访问控制与继承
+受保护的成员
+	一个类使用protected关键字来声明哪些它希望与派生类分享但是不想被其他公共访问使用的成员。
+1) 和私有成员类似，受保护的成员对于类的用户来说是不可访问的。
+2) 和公有成员类似，受保护的成员对于派生类的成员和友元来说是可访问的。
+3) 派生类的成员或友元只能通过派生类对象来访问基类的受保护成员，派生类对于一个基类对象中受保护成员没有任何访问特权。
+class Base {
+protected:
+	int prot_mem;
+};
+class Sneaky : public Base {
+	friend void clobber(Sneaky &); 	//能访问Sneaky::prot_mem
+	friend void clobber(Base &); 	//不能访问Base::prot_mem
+};
+公有，私有和受保护继承
+	某个类对其继承而来的成员的访问权限受到两个因素影响： 一是在基类中该成员的访问说明符，二是在派生类的派生列表中的访问说明符。
+class Base {
+public:
+    void pub_mem();
+protected:
+    int prot_mem;
+private:
+    char priv_mem;
+};
+
+class Pub_Derv : public Base {
+public:
+    // 正确： 派生类能访问protected成员
+    int f() { return prot_mem; }
+    // 错误： private成员对于派生类来说是不可访问的
+    char g() { return priv_mem; }
+};
+
+class Priv_Derv : private Base {
+public:
+    // private不影响派生类的访问权限
+    int f1() const { return prot_mem; }
+};
+派生访问说明符的目的是控制派生类用户对于基类成员的访问权限：
+Pub_Derv d1;
+Priv_Derv d2;
+d1.pub_mem(); 	//正确： pub_mem在派生类中是public
+d2.pub_mem();	//错误： pub_mem在派生类中是private
+
+15.6 继承中的类作用域
+	当存在继承关系时，派生类的作用域嵌套在其基类的作用域之内。如果一个名字在派生类的作用域内无法正确解析，则编译器将继续在外层的基类作用域中寻找该名字的定义。
+	并且，编译器的函数名字查找先于类型检查。所以如果派生类的函数和基类的函数只是函数名相同，形参不同，派生类依旧进行了覆盖。

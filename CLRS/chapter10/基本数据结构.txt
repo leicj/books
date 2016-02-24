@@ -1,0 +1,281 @@
+栈和队列:
+栈是后进先出策略,伪代码如下:
+STACK-EMPTY(S)
+	if S.top == 0:
+		return TRUE
+	else return FALSE
+
+PUSH(S, x)
+	S.top = S.top + 1
+	S[S.top] = x
+
+POP(S)
+	if STACK-EMPTY(S):
+		error "underflow"
+	else S.top = S.top - 1
+		return S[S.top + 1]
+具体实现C语言版:
+#include <stdio.h>
+
+#define SIZE 100
+int top = -1;
+int stack_empty(int S[])
+{
+    if (-1 == top) {
+        return 1;
+    }
+    return 0;
+}
+
+void push(int S[], int x)
+{
+    if (top < SIZE) {
+        top = top + 1;
+        S[top] = x;
+    }
+}
+
+int pop(int S[])
+{
+    if (!stack_empty(S)) {
+        top = top - 1;
+        return S[top + 1];
+    }
+}
+
+void print(int S[])
+{
+     int i = 0;
+     for (i = 0; i <= top; i++) {
+         printf("%d ", S[i]);
+     }
+     printf("\n");
+}
+
+int main(void)
+{
+     int S[SIZE];
+     push(S, 1);
+     push(S, 4);
+     pop(S);
+     push(S, 2);
+     push(S, 8);
+     push(S, 0);
+     pop(S);
+     print(S);
+
+     return 0;
+}
+
+队列是先进先出策略,伪代码如下:
+ENQUEUE(Q, x):
+	Q[Q.tail] = x
+	if Q.tail == Q.length:
+		Q.tail = 1
+	else Q.tail = Q.tail + 1
+
+DEQUEUE(Q)
+	x = Q[Q.head]
+	if Q.head = Q.length:
+		Q.head = 1
+	else Q.head = Q.head + 1
+	return x
+具体实现C语言版:
+#include <stdio.h>
+#include <limits.h>
+
+#define SIZE 10
+int head = 0;
+int tail = 0;
+
+int queue_empty()
+{
+    return (head == tail);
+}
+
+int queue_full()
+{
+    return ((0 == head && SIZE - 1 == tail) || (1 == head && SIZE == tail) || (head - 1 == tail));
+}
+
+void enqueue(int Q[], int x)
+{
+    if (queue_full()) {
+        return;
+    }
+    Q[tail] = x;
+    if (tail == SIZE - 1) {
+         tail = 0;
+    } else {
+        tail += 1;
+    }
+}
+
+int dequeue(int Q[])
+{
+    int x;
+    if (queue_empty()) {
+        return INT_MIN;
+    }
+    x = Q[head];
+    if (head == SIZE - 1) {
+        head = 0;
+    } else {
+         head += 1;
+    }
+    return x;
+}
+
+void print(int Q[])
+{
+    int i = 0;
+    if (tail > head) {
+        for (i = head; i < tail; i++) {
+            printf("%d ", Q[i]);
+        }
+        printf("\n");
+    } else {
+        for (i = head; i < SIZE; i++) {
+            printf("%d ", Q[i]);
+        }
+        for (i = 0; i < tail; i++) {
+            printf("%d ", Q[i]);
+        }
+        printf("\n");
+    }
+}
+int main(void)
+{
+    int Q[SIZE] = {};
+    int i = 0;
+
+    for (i = 0; i < 9; i++) {
+         enqueue(Q, i);
+    }
+    print(Q);
+
+    dequeue(Q);
+    dequeue(Q);
+    dequeue(Q);
+    for (i = 0; i < 4; i++) {
+         enqueue(Q, i);
+    }
+    print(Q);
+
+    return 0;
+}
+
+链表:
+双向链表L的每一个元素都是一个对象,每个对象有一个关键字key和两个指针:next和prev.设x为链表的一个元素,x.next指向它在链表中的后继元素,x.prev则指向它的前驱元素.如果x.prev = NIL,则元素x没有前驱,因此是链表的第一个元素.如果x.next = NIL,则元素没有后继,因此是链表的最后一个元素.属性L.head指向链表的第一个元素.如果L.head = NIL, 则链表为空.
+链表的搜索:
+伪代码如下:
+LIST-SEARCH(L, k)
+	x = L.head
+	while x != NIL and x.key != k
+		x = x.next
+	return x
+链表的插入(在表头插入):
+伪代码如下:
+LIST-INSERT(L, x)
+	x.next = L.head
+	if L.head != NIL:
+		L.head.prev = x
+	L.head = x
+	x.prev = NIL
+链表的删除:
+LIST-DELETE(L, x)
+	if x.prev != NIL:
+		x.prev.next = x.next
+	else L.head = x.next
+	if x.next != NIL:
+		x.next.prev = x.prev
+但这样实现异常复杂,复杂在于L.head无法确定下来.我们可以使用哨兵对象来实现L.head.
+假设L为哨兵对象,则L.next指向表头,L.prev指向表尾.而表头的prev和表尾的next均指向L即可.
+伪代码如下:
+LIST-SEARCH(L, k)
+	x = L.next
+	while x != L and x.key != k:
+		x = x.next
+	return x
+LIST-INSERT(L, x)
+	x.next = L.next
+	L.next.prev = x
+	L.next = x
+	x.prev = L
+LIST-DELETE(L, x)
+	x.prev.next = x.next
+	x.next.prev = x.prev
+
+具体实现C语言版:
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+typedef struct LIST{
+    int value;
+    struct LIST *prev;
+    struct LIST *next;
+} List;
+
+void list_insert(List *L, List *x)
+{
+    x->next = L->next;
+    L->next->prev = x;
+    L->next = x;
+    x->prev = L;
+}
+
+void list_delete(List *L, List *x)
+{
+    x->prev->next = x->next;
+    x->next->prev = x->prev;
+}
+
+List list_search(List *L, int k)
+{
+     List *x = L->next;
+     while (x != L && x->value != k) {
+         x = x->next;
+     }
+     return *x;
+}
+
+void print(List *L)
+{
+    while (L->next->value != INT_MIN) {
+        printf("%d-->", L->next->value);
+        L = L->next;
+    }
+    printf("NULL\n");
+}
+
+int main(void)
+{
+    List *L = (List *)malloc(sizeof(List *));
+    L->next = L->prev = L;
+    L->value = INT_MIN;
+    List l1, l2, l3, l4, l5, l6, l7;
+    List searchL;
+    l1.value = 1;
+    l2.value = 2;
+    l3.value = 3;
+    l4.value = 4;
+    l5.value = 5;
+    l6.value = 6;
+    l7.value = 7;
+    l1.prev = l1.next = l2.prev = l2.next = l3.prev = l3.next = l4.prev = l4.next = l5.prev = l5.next = l6.prev = l6.next = l7.prev = l7.next = NULL;
+    list_insert(L, &l1);
+    list_insert(L, &l2);
+    list_insert(L, &l3);
+    list_insert(L, &l4);
+    list_insert(L, &l5);
+    list_insert(L, &l6);
+    list_insert(L, &l7);
+    print(L);
+    
+    searchL = list_search(L, 4);
+    list_delete(L, &searchL);
+    print(L);
+
+    return 0;
+}

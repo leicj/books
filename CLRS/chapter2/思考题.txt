@@ -1,0 +1,127 @@
+2-1: 在归并排序中对小数组采用插入排序
+基本原理: 在归并排序中当子问题变得足够小时,采用插入排序来使得递归的叶变粗.
+修改: 使用插入排序来排序长度为k的n/k个子表,然后使用标准的合并机制来合并这些子表.
+a: 证明:插入排序最坏情况可以在O(nk)时间内排序每个长度为k的n/k个子表.
+答: 对于k个元素的插入排序,复杂度为k*k, 则排序n/k个子表需要的复杂度为k*k*n/k=nk
+b: 表明在最坏情况下在nlg(n/k)时间内合并这些子表.
+答: 归并排序的复杂度为nlgn,但是由于只有n/k张表,则复杂度为nlg(n/k)
+c: 复杂度为nk + nlg(n/k),如果运行时间相同,则k的最大值为多少?
+答: nk + nlg(n/k) <= nlgn, 则k = lgn为最大值.
+
+2-2: 冒泡排序的正确性
+伪代码如下:
+BUBBLESORT(A)
+    for i = 1 to A.length - 1:
+	for j = A.length downto i + 1:
+	    if A[j] < A[j - 1]:
+		exchange(A[j], A[j - 1])
+具体实现C语言版:
+#include <stdio.h>
+
+void bubblesort(int A[], int len)
+{
+    int i = 0, j = 0;
+    int temp;
+    for (i = 0; i < len - 1; i++) {
+        for (j = len - 1; j > i; j--) {
+            if (A[j] < A[j - 1]) {
+                temp = A[j];
+                A[j] = A[j - 1];
+                A[j - 1] = temp;
+            }
+        }
+    }
+}
+
+int main(void)
+{
+    int A[] = {1, 3, 5, 7, 2, 6, 4, 9, 8};
+    int len = 9;
+    int i = 0;
+    bubblesort(A, len);
+
+    for (i = 0; i < len; i++) {
+        printf("%d ", A[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
+
+2-3: (霍纳Horner规则的正确性)
+原理:
+伪代码:
+y = 0
+for i = n down 0:
+    y = ai + x * y
+实现了用于求值多项式:
+P(x) = a0 + x(a1 + x(a2 + … + x(a(n-1) + xan)))
+
+a: 复杂度为n
+b: 如果从头开始计算多项式的每个项,则算法的伪代码如下:
+for i = 0 to n:
+    t = 1
+    for j = 0 to i:
+	t *= x
+    y += ai * t
+
+2-4: (逆序对):假设A[1...n]是一个有n个不同数的数组,若i<j且A[i]>A[j],则对偶(i,j)称为A的一个逆序对.
+a: 列出数组(2,3,8,6,1)的5个逆序对
+(2,1),(3,1),(8,6),(8,1),(6,1)
+b: 由集合(1,2,...n)中的元素构成的什么数组具有最多的逆序对?
+逆序排列的数组.
+c: 插入排序的运行时间与输入数组中的逆序对的数量之间是什么关系?
+相等.
+实现的伪代码如下:
+INSERTION-SORT(A)
+    count = 0
+    for j = 2 to A.length:
+	key = A[j]
+	i = j - 1
+	while i > 0 and A[i] > key:
+	    A[i + 1] = A[i]
+	    i = i - 1
+	    count++
+        A[i + 1] = key
+    return count
+具体实现C语言版:
+#include <stdio.h>
+
+int insertionsort(int A[], int len)
+{
+    int i = 0, j = 0, count = 0;
+    int key = 0;
+
+    for (j = 1; j < len; j++) {
+        key = A[j];
+        i = j - 1;
+        while (i >= 0 && A[i] > key) {
+            A[i + 1] = A[i];
+            i -= 1;
+            count++;
+        }
+
+        A[i + 1] = key;
+    }
+    return count;
+}
+
+int main(void)
+{
+    int A[] = {2, 3, 8, 6, 1};
+    int len = 5;
+    int count = 0;
+    int i = 0;
+
+    count = insertionsort(A, len);
+
+    for (i = 0; i < len; i++) {
+         printf("%d ", A[i]);
+    }
+    printf("\n%d\n", count);
+
+    return 0;
+}
+同理,对于归并排序,只要找到两个数交换的地方,将count++即可.
+
+

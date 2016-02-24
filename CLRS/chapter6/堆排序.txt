@@ -1,0 +1,386 @@
+堆排序的时间复杂度为O(nlgn),且具有空间原址性.
+堆:
+(二叉)堆是一个数组,它可以被看成一个近似的完全二叉树,树上的每一个节点对应数组中的一个元素.
+二叉堆分为两种形式:最大堆和最小堆.最大堆的性质是:父节点的值>=子节点的值.而最小堆的性质是:父节点的值<=子节点的值.
+如果把堆看成一棵树,我们定义一个堆中的结点的高度就为该结点到叶节点最长简单路径上"边"的数目;进而我们可以把堆的高度定义为根结点的高度.所以,如果高度为h的堆中,元素个数最多为2^(h + 1),最少为(h + 1).
+堆的一些基本过程:
+MAX-HEAPIFY过程: 其时间复杂度为O(lgn),它是维护最大堆性质的关键.
+BUILD-MAX-HEAP过程:具有线性时间复杂度,功能是从无序的输入数据数组中构造一个最大堆
+HEAPSORT过程: 其时间复杂度为O(nlgn),功能是对一个数组进行原址排序
+MAX-HEAP-INSERT,HEAP-EXTRACT-MAX,HEAP-INCREASE-KEY和HEAP-MAXIMUM过程:时间复杂度为O(lgn),功能是利用堆实现一个优先队列.
+
+维护堆的性质
+MAX-HEAPIFY是用于维护最大堆性质的重要过程.它的输入为一个数组A和一个下表i.在调用MAX-HEAPIFY的时候,我们假定根节点为LEFT(i)和RIGHT(i)的二叉树都是最大堆,但这时A[i]有可能小于其孩子,这样就违背了最大堆的性质.MAX-HEAPIFY通过让A[i]的值在最大堆中"逐级下降",从而使得下表i为根结点的子树重新遵循最大堆的性质.
+伪代码如下:
+MAX-HEAPIFY(A, i)
+    l = LEFT(i)
+    r = RIGHT(i)
+    if l <= A.heap-size and A[l] > A[i]:
+    	largest = l
+    else
+    	largest = i
+    if r <= A.heap-size and A[r] > A[largest]:
+    	largest = r
+    if largest != i:
+    	exchange A[i] with A[largest]
+    	MAX-HEAPIFY(A, largest)
+
+具体实现C语言版:
+#include <stdio.h>
+
+void swap(int *x, int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+void max_heapify(int arr[], int i, int len)
+{
+    int leftIndex = 0;
+    int rightIndex = 0;
+    int largestIndex = 0;
+
+    leftIndex = i * 2 + 1;
+    rightIndex = i * 2 + 2;
+
+    if (leftIndex < len) {
+        if (leftIndex < len && arr[leftIndex] > arr[i]) {
+            largestIndex = leftIndex;
+        } else {
+             largestIndex = i;
+        }
+        if (rightIndex < len && arr[rightIndex] > arr[largestIndex]) {
+            largestIndex = rightIndex;
+        }
+
+        if (largestIndex != i) {
+             swap(&arr[largestIndex], &arr[i]);
+             max_heapify(arr, largestIndex, len);
+        }
+        max_heapify(arr, leftIndex, len);
+        max_heapify(arr, rightIndex, len);
+    }
+}
+int main(void)
+{
+    int i = 0;
+    int arr[10] = {16, 4, 10, 14, 7, 9, 3, 2, 8, 1};
+    max_heapify(arr, 0, 10);
+
+    for (i = 0; i < 10; i++) {
+        printf("%d ", arr[i]);
+    }
+
+    printf("\n");
+
+    return 0;
+}
+
+建堆
+我们可以用自底向上的方法利用过程MAX-HEAPIFY把一个大小为n=A.length的数组A[1...n]转换为最大堆.
+伪代码如下:
+BUILD-MAX-HEAP(A)
+	for i = [A.length / 2] downto 1
+		MAX-HEAPIFY(A, i)
+具体实现C语言版:
+#include <stdio.h>
+
+void swap(int *x, int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+void max_heapify(int arr[], int i, int len)
+{
+    int leftIndex = 0;
+    int rightIndex = 0;
+    int largestIndex = 0;
+
+    leftIndex = i * 2 + 1;
+    rightIndex = i * 2 + 2;
+
+    if (leftIndex < len) {
+        if (leftIndex < len && arr[leftIndex] > arr[i]) {
+            largestIndex = leftIndex;
+        } else {
+             largestIndex = i;
+        }
+        if (rightIndex < len && arr[rightIndex] > arr[largestIndex]) {
+            largestIndex = rightIndex;
+        }
+
+        if (largestIndex != i) {
+             swap(&arr[largestIndex], &arr[i]);
+             max_heapify(arr, largestIndex, len);
+        }
+       // max_heapify(arr, leftIndex, len);
+       // max_heapify(arr, rightIndex, len);
+    }
+}
+int main(void)
+{
+    int i = 0;
+    int arr[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    for (i = 10 / 2; i >= 0; i--) {
+         max_heapify(arr, i, 10);
+    }
+
+    for (i = 0; i < 10; i++) {
+        printf("%d ", arr[i]);
+    }
+
+    printf("\n");
+
+    return 0;
+}
+
+堆排序算法
+初始时候,堆排序算法利用BUILD-MAX-HEAP将输入数组A[1...n]建成最大堆,其中n=A.length.因为数组中的最大元素总在根结点A[1]中,通过把它与A[n]进行互换,我们可以让该元素放到正确的位置.这时候,如果我们从堆中去掉结点n,剩余的结点中,原来根的孩子结点仍然是最大堆,而新的根节点可能会违背最大堆的性质.为了维护最大堆的性质,我们要做的是调用MAX-HEAPIFY(A, 1),从而在A[1...n-1]上构造一个新的最大堆.堆排序算法会不断的重复这一过程,直到堆的大小从n-1降到2.
+伪代码如下:
+HEAPSORT(A)
+	BUILD-MAX-HEAP(A)
+	for i = A.length downto 2
+		exchange A[1] with A[i]
+		A.heap-size = A.heap-size - 1
+		MAX-HEAPIFY(A, 1)
+
+具体实现C语言版:
+#include <stdio.h>
+
+void swap(int *x, int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+void max_heapify(int arr[], int i, int len)
+{
+    int leftIndex = 0;
+    int rightIndex = 0;
+    int largestIndex = 0;
+
+    leftIndex = i * 2 + 1;
+    rightIndex = i * 2 + 2;
+
+    if (leftIndex < len) {
+        if (leftIndex < len && arr[leftIndex] > arr[i]) {
+            largestIndex = leftIndex;
+        } else {
+             largestIndex = i;
+        }
+        if (rightIndex < len && arr[rightIndex] > arr[largestIndex]) {
+            largestIndex = rightIndex;
+        }
+
+        if (largestIndex != i) {
+             swap(&arr[largestIndex], &arr[i]);
+             max_heapify(arr, largestIndex, len);
+        }
+       // max_heapify(arr, leftIndex, len);
+       // max_heapify(arr, rightIndex, len);
+    }
+}
+
+void build_max_heap(int arr[], int len)
+{
+    int i = 0;
+    for (i = len / 2; i >= 0; i--) {
+        max_heapify(arr, i, len);
+    }
+}
+
+void heapsort(int arr[], int len)
+{
+    int i = 0;
+    build_max_heap(arr, len);
+    for (i = len - 1; i >= 1; i--) {
+         swap(&arr[0], &arr[i]);
+         len -= 1;
+         max_heapify(arr, 0, len);
+    }
+}
+int main(void)
+{
+    int i = 0;
+    int arr[10] = {11, 21, 13, 4, 15, 61, 17, 18, 9, 110};
+
+    heapsort(arr, 10);
+
+    for (i = 0; i < 10; i++) {
+        printf("%d ", arr[i]);
+    }
+
+    printf("\n");
+
+    return 0;
+}
+
+优先队列
+优先队列是一种用来维护由一组元素构成的集合S的数据结构,其中的每一个元素都有一个相关的值,称为关键字.一个最大优先队列支持以下操作:
+INSERT(S, x): 把元素x插入集合S中.
+MAXIMUM(S): 返回S中具有最大键值的元素.
+EXTRACT-MAX(S): 去掉并返回S中的具有最大关键字的元素.
+INCREASE-KEY(S, x, k): 将元素x的关键字值增加到k, 这里假设k的值不小于x的原关键字值.
+伪代码如下:
+HEAP-MAXIMUM(A)
+	return A[1]
+HEAP-EXTRACT-MAX(A)
+	if A.heap-size < 1
+		error "heap underflow"
+	max = A[1]
+	A[1] = A[A.heap-size]
+	A.heap-size = A.heap-size - 1
+	MAX-HEAPIFY(A, 1)
+	return max
+HEAP-INCREASE-KEY(A, i, key)
+	if key < A[i]:
+		error "new key is smaller than current key"
+	A[i] = key
+	while i > 1 and A[PARENT(i)] < A[i]:
+		exchange A[i] with A[PARENT(i)]
+		i = PARENT(i)
+MAX-HEAP-INSERT(A, key)
+	A.heap-size = A.heap-size + 1
+	A[A.heap-size] = INT_MAX
+	HEAP-INCREASE-KEY(A, A.heap-size, key)
+具体实现C语言版:
+#include <stdio.h>
+#include <limits.h>
+
+void swap(int *x, int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+void max_heapify(int arr[], int i, int len)
+{
+    int leftIndex = 0;
+    int rightIndex = 0;
+    int largestIndex = 0;
+
+    leftIndex = i * 2 + 1;
+    rightIndex = i * 2 + 2;
+
+    if (leftIndex < len) {
+        if (leftIndex < len && arr[leftIndex] > arr[i]) {
+            largestIndex = leftIndex;
+        } else {
+             largestIndex = i;
+        }
+        if (rightIndex < len && arr[rightIndex] > arr[largestIndex]) {
+            largestIndex = rightIndex;
+        }
+
+        if (largestIndex != i) {
+             swap(&arr[largestIndex], &arr[i]);
+             max_heapify(arr, largestIndex, len);
+        }
+       // max_heapify(arr, leftIndex, len);
+       // max_heapify(arr, rightIndex, len);
+    }
+}
+
+void build_max_heap(int arr[], int len)
+{
+    int i = 0;
+    for (i = len / 2; i >= 0; i--) {
+        max_heapify(arr, i, len);
+    }
+}
+
+void heapsort(int arr[], int len)
+{
+    int i = 0;
+    build_max_heap(arr, len);
+    for (i = len - 1; i >= 1; i--) {
+         swap(&arr[0], &arr[i]);
+         len -= 1;
+         max_heapify(arr, 0, len);
+    }
+}
+
+int heap_maximum( int arr[] )
+{
+    return arr[ 0 ];
+}
+
+int heap_extract_max( int arr[], int len )
+{
+    int maxNum = 0;
+    if ( len < 1 ){
+        printf("error! empty queue\n");
+        return INT_MIN;
+    }
+    maxNum = arr[ 0 ];
+    arr[ 0 ] = arr[ len - 1 ];
+    len -= 1;
+    max_heapify( arr, 0 , len );
+    
+    return maxNum;
+}
+
+void heap_increase_key( int arr[], int i, int key )
+{
+    if ( key < arr[ i ] ){
+        printf("error! can not insert\n");
+        return;
+    }
+    arr[ i ] = key;
+    while ( i > 0 && arr[ i / 2 ] < arr[ i ] ){
+        swap( &arr[ i ], &arr[ i / 2 ] );
+        i /= 2;
+    }
+}
+
+void max_heap_insert( int arr[], int len, int key )
+{
+    len += 1;
+    arr[ len - 1 ] = INT_MIN;
+    heap_increase_key( arr, len - 1, key );
+}
+
+int main( void )
+{
+    int i = 0;
+    int arr[ 10 ];
+    for ( i = 0; i < 10; i++ ){
+        arr[ i ] = i;
+    }
+    
+    build_max_heap( arr, 10 );
+    
+    for ( i = 0; i < 10; i++ ){
+        printf("%d ", arr[ i ] );
+    }
+    printf("\n");
+    printf("最大节点:%d\n", heap_extract_max( arr, 10 ) );
+    printf("最大节点:%d\n", heap_extract_max( arr, 9 ) );
+    heap_increase_key( arr, 5, 100 );
+    printf("最大节点:%d\n", heap_maximum( arr ) );
+    max_heap_insert( arr, 8, 9 );
+    max_heap_insert( arr, 9, 8 );
+    
+    for ( i = 0; i < 10; i++ ){
+        printf("%d ", arr[ i ] );
+    }
+    
+    
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+

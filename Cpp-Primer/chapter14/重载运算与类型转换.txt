@@ -1,0 +1,169 @@
+14.1 基本概念
+	不能被重载的运算符： :: .* . ?:
+	罗辑与，罗辑或，逗号运算符，不应该被重载，因为这样无法保留其短路求值属性。
+
+14.2 输入和输出运算符
+14.2.1 重载输出运算符<<
+	通常情况下，输出运算符的第一个形参是一个非常量ostream对象的引用。之所以ostream是非常量是因为向流写入内容会改变其状态，而该形参是引用是因为我们无法直接复制一个ostream对象。
+	第二个形参一般是常量的引用。
+	为了与其他输出运算符保持一致，operator<<一般要返回它的ostream形参。
+ostream &operator<<(ostream &os, const Sales_data &item)
+{
+	os << item.isbn() << " " << item.unit_solds << " "
+		<< item.revenue << " " << item.avg_price();
+	return os;
+}
+14.2.2 重载输入运算符>>
+	通常情况下，输入运算符的第一个形参是运算符将要读取的流的引用，第二个形参是将要读入到的对象的引用。
+istream &operator>>(istream &is, Sales_data &item)
+{
+	double price;
+	is >> item.bookNo >> item.units_sold >> price;
+	if (is)
+		item.revenue = item.units_sold * price;
+	else
+		item = Sales_data();
+	return is;
+}
+
+14.3 算术和关系运算符
+Sales_data operator+(const Sales_data &lhs, const Sales_data &rhs)
+{
+	Sales_data sum = lhs;
+	sum += rhs;
+	return sum;
+}
+14.3.1 相等运算符
+bool operator==(const Sales_data &lhs, const Sales_data &rhs)
+{
+	return lhs.isbn() == rhs.isbn() &&
+			lhs.units_sold == rhs.units_sold &&
+			lhs.revenue == rhs.revenue;
+}
+bool operator!=(const Sales_data &lhs, const Sales_data &rhs)
+{
+	return !(lhs == rhs);
+}
+
+14.4 赋值运算符
+Sales_data &Sales_data::operator+=(const Sales_data &rhs)
+{
+	units_sold += rhs.units_sold;
+	revenue += rhs.revenue;
+	return *this;
+}
+
+14.5 下标运算符
+	我们通常定义常量版本和非常量版本：
+class StrVec{
+public:
+	std::string &operator[](std::size_t n)
+	{ return elements[n];}
+	const std::string &operator[](std::size_t n) const
+	{ return elements[n];}
+private:
+	std::string *elements;
+};
+
+14.6 递增和递减运算符
+	定义递增和递减运算符的类应该同时定义前置版本和后置版本。这些运算符通常应该被定义成类的成员。
+class StrBlobPtr{
+public:
+	StrBlobPtr &operator++()
+	{
+		return ++*this;
+	}
+	StrBlobPtr &operator--()
+	{
+		return --*this;
+	}
+	StrBlobPtr &operator++(int)
+	{
+		StrBlobPtr ret = *this;
+		++*this;
+		return ret;
+	}
+	StrBlobPtr &operator--(int)
+	{
+		StrBlobPtr ret = *this;
+		--*this;
+		return ret;
+	}
+};
+
+14.8 函数调用运算符
+struct absInt{
+	int operator()(int val) const {
+		return val < 0 ? -val : val;
+	}
+};
+int i = -42;
+absInt absObj;
+int ui = absObj(i);
+	如果类定义了调用运算符，则该类的对象称作函数对象。因为可以调用这种对象，所以我们说这些对象的“行为像函数一样”。
+	和其他类一样，函数对象类除了operator()之外也可以包含其他成员。函数对象类通常含有一些数据成员，这些成员被用于定制调用运算符中的操作。
+class PrintString{
+public:
+	PrintString(ostream &o = cout, char c = ' '):
+		os(o), sep(c) {}
+	void operator()(const string &s) const { os << s << sep; }
+private:
+	ostream &os;
+	char sep;
+};
+14.8.1 lambda是函数对象
+// 根据单词的长度对其进行排序，对于长度相同的单词按照字母表顺序排序
+stable_sort(words.begin(), words.end(),
+				[](const string &a, const string &b)
+					{return a.size() < b.size();});
+我们可以使用仿函数进行改写：
+class ShorterString{
+public:
+	bool operator()(const string &s1, const string &s2) const
+	{ return s1.size() < s2.size();}
+};
+stable_sort(words.begin(), words.end(), ShorterString());
+表示lambda及相应捕获行为的类
+	通过值捕获的变量被拷贝到lambda中。因此，这种lambda产生的类必须为每个值捕获的变量建立对应的数据成员，同时创建构造函数，令其使用捕获的变量的值来初始化数据成员。
+// 获得第一个指向满足条件元素的迭代器，该元素满足size() is >= sz
+auto wc = find_if(words.begin(), words.end(),
+					[sz](const string &a)
+					{return a.size() >= sz;});
+而仿函数改写如下：
+class SizeComp{
+public:
+	SizeComp(size_t n) : sz(n) {}
+	bool operator()(const string &s) const
+		{return s.size() >= sz;}
+private:
+	size_t sz;
+};
+auto wc = find_if(words.begin(), words.end(), SizeComp(sz));
+14.8.2 标准库定义的函数对象
+算术 				关系						罗辑
+plus<Type>		equal_to<Type>			logical_and<Type>
+minus<Type>  	not_equal_to<Type> 		logical_or<Type>
+multiplies<Type> greater<Type>			logical_not<Type>
+divides<Type>	greater_equal<Type>
+modulus<Type> 	less<Type>
+negate<Type> 	less_equal<Type>
+14.8.3 可调用对象与function
+不同类型可能具有相同的调用形式
+// 普通函数
+int add(int i, int j) {return i + j;}
+// lambda,其产生一个未命名的函数对象类
+auto mod = [](int i, int j) {return i % j;}
+//函数对象类
+struct divide{
+	int operator()(int denominator, int divisor) {
+		return denominator / divisor;
+	}
+};
+我们无法将mod/divide表达为一个函数指针，因为其为lambda表达式。我们需要标准库的function类型来表达通用的lambda函数：
+function<int(int, int)> f1 = add;
+function<int(int, int)> f2 = divide();
+function<int(int, int)> f3 = [](int i, int j) { return i * j;}
+
+cout << f1(4, 2) << endl;
+cout << f2(4, 2) << endl;
+cout << f3(4, 2) << endl;

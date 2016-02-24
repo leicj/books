@@ -1,0 +1,4 @@
+我们只需要判断
+int nchars = columns[col + 1] - columns[col] + 1;
+中columns[col + 1]和columns[col]的大小顺序即可.如果columns[col] > columns[col + 1],
+则swap它们的值即可.

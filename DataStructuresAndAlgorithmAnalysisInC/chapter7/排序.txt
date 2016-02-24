@@ -1,0 +1,70 @@
+1. 插入排序
+	插入排序由N-1趟排序组成.对已P=1趟到P=N-1趟,插入排序保证从位置0到位置P上的元素为已排序状态.
+插入排序代码参考insertsort.c
+
+2. 希尔排序
+	希尔排序使用一个序列h1, h2, ..., hk,叫做增量序列.只要h1=1,任何增量都是可行的.在使用增量hk的一趟排序之后,对于每一个i我们有A[i] <= A[i + hk];所有相隔hk的元素都被排序.此时称文件是hk-排序.
+希尔排序代码参考shellsort.c
+
+3. 堆排序
+	参考<算法导论>, 具体实现参考第六章的堆排序
+
+4. 归并排序
+	基本思想就是: 合并两个已排序的表.
+归并排序参考mergesort.c
+
+5. 快速排序
+	基本思想如下:
+1. 如果S中元素个数是0或1,则返回
+2. 取S中任一元素v,称之为枢纽元
+3. 将S - {v}(S中其余元素)分成两个不相交的集合:S1为所有小于等于v的集合(不包含v),S2为所有大于等于v的集合(不包含v)
+4. 返回quicksort(S1)后,继随v,继而quicksort(S2)
+#include <stdio.h>
+
+int partition(int A[], int p, int r);
+
+void swap(int *x, int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+void quicksort(int A[], int p, int r)
+{
+    int q = 0;
+    if (p < r) {
+        q = partition(A, p, r);
+        quicksort(A, p, q - 1);
+        quicksort(A, q + 1, r);
+    }
+}
+
+int partition(int A[], int p, int r)
+{
+    int x = A[r];
+    int i = p - 1;
+    int j = 0;
+    for (j = p; j < r; j++) {
+        if (A[j] <= x) {
+            i = i + 1;
+            swap(&A[i], &A[j]);
+        }
+    }
+    swap(&A[i + 1], &A[r]);
+    return i + 1;
+}
+
+int main(void)
+{
+     int arr[] = {13, 18, 2, 76, 12, 45, 1, 5, 2, 111, 321, 234, -1};
+     int i = 0;
+    quicksort(arr, 0, 12);
+
+    for (i = 0; i < 13; i++) {
+         printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    return 0;
+}

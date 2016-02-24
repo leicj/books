@@ -1,0 +1,16 @@
+1. malloc和free
+void *malloc(size_t size);
+void free(void *pointer);
+
+malloc返回一个指向被分配的内存块其实位置的指针.如果分配失败,则返回NULL.
+free的参数必须要么是NULL,要么是一个先前从malloc, calloc或realloc返回的值.
+
+2. calloc和realloc
+void *calloc(size_t num_elements, size_t element_size);
+void realloc(void *ptr, size_t new_size);
+
+calloc会初始化数据为0,其参数包括所需元素的数量和每个元素的字节数.
+realloc函数用于修改一个原先已经分配的内存块的大小.如果它用于扩大一个内存块,那么这块内存原先的内容依然保留,新增加的内存添加到原先内存块的后面,新内存并未以任何方法进行初始化.如果它用于缩小一个内存块,该内存块尾部的部分内存便被拿掉,剩余部分内存的原先内容依然保留.
+
+3. 常见的动态内存错误
+对NULL指针进行解引用操作,对分配的内存进行操作时越过边界,释放并非动态分配的内存,试图释放一块动态分配的内存的一部分以及一块动态内存被释放之后被继续使用.

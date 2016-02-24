@@ -1,0 +1,358 @@
+1. 红黑树的性质
+	红黑树是一棵二叉搜索树,它在每个结点上增加了一个存储位来表示结点的颜色,可以是RED或BLACK.
+	树中每个结点包含5个属性:color, key, left, right和p.如果一个结点没有子结点或父节点,则该节点相应指针属性的值为NIL.
+	一棵红黑树是满足下面红黑性质的二叉搜索树:
+1. 每个节点或是红色,或是黑色.
+2. 根节点是黑色.
+3. 每个叶节点是黑色.
+4. 如果一个节点是红色,则它的两个子节点都是黑色的.
+5. 对每个节点,从该节点到其所有后代叶节点的简单路径上,均包含相同数目的黑色节点.
+
+2. 旋转
+	由于增加和删除节点会破坏红黑树的性质,所以需要通过旋转操作来完成.
+	当某个节点x上做左旋时,假设它的右孩子为y而不是T.nil;x可以为其右孩子不是T.nil节点的树内任意节点.左旋以x到y的链为"支轴"进行.它使y成为该子树新的根节点,x成为y的左孩子,y的左孩子成为x的右孩子.
+	|                                           |
+	|										    |
+	y           <--LEFT-ROTATE(T, x)		    x
+   / \										   / \
+  x   a3		-->RIGHT-ROTATE(T, x)		  a1  y
+ / \											 / \
+a1  a2											a2  a3
+左旋的伪代码如下:
+LEFT-ROTATE(T, x)
+	y = x.right
+	x.right = y.left
+	if y.left != T.nil
+		y.left.p = x
+	y.p = x.p
+	if x.p == T.nil
+		T.root = y
+	elif x === x.p.left
+		x.p.left = y
+	else x.p.right = y
+	y.left = x
+	x.p = y
+右旋的伪代码如下:
+RIGHT-ROTATE(T, y)
+	x = y.left
+	y.left = x.right
+	if x.right != T.nil
+		x.right.p = y
+	x.p = y.p
+	if y.p == T.nil
+		T.root = x
+	elif y == y.p.left
+		y.p.left = x
+	else y.p.right = x
+	x.right = y
+	y.p = x
+插入的伪代码如下(具体分析查看算法导论):
+RB-INSERT(T, z)
+	y = T.nil
+	x = T.root
+	while x != T.nil
+		y = x
+		if z.key < x.key
+			x = x.left
+		else
+			x = x.right
+	z.p = y
+	if y == T.nil
+		T.root = z
+	elif z.key < y.key
+		y.left = z
+	else y.right = z
+	z.left = T.nil
+	z.right = T.nil
+	z.color = RED
+	RB-INSERT-FIXUP(T, z)
+RB-INSERT-FIXUP(T, z)
+	while z.p.color == RED
+		if z.p === z.p.p.left
+			y = z.p.p.right
+			if y.color == RED
+				z.p.color = BLACK
+				y.color = BLACK
+				z.p.p.color = RED
+				z = z.p.p
+			else if z == z.p.right
+				z = z.p
+				LEFT-ROTATE(T, z)
+			else
+				z.p.color = BLACK
+				z.p.p.color = RED
+				RIGHT-ROTATE(T, z.p.p)
+		else:
+			y = z.p.p.left
+			if y.color == RED
+				z.p.color = BLACK
+				y.color = BLACK
+				z.p.p.color = RED
+				z = z.p.p
+			else if z == z.p.right
+				z = z.p
+				LEFT-ROTATE(T, z)
+			else
+				z.p.color = BLACK
+				z.p.p.color = RED
+				RIGHT-ROTATE(T, z.p.p)
+
+具体实现C语言版(PS:删除的部分没看懂):
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <string.h>
+
+
+typedef struct RBTREE {
+    int         color;//0为红,1为黑
+    int         data;
+    struct RBTREE   *lchild;
+    struct RBTREE   *rchild;
+    struct RBTREE   *parent;
+}RBTree;
+
+// 左旋函数
+void leftRotate(RBTree *rbtree, RBTree *x);
+// 右旋函数
+void rightRotate(RBTree *rbtree, RBTree *x);
+// 插入函数
+void rbInsert(RBTree *rbtree, RBTree *x);
+// 删除节点
+void rbDelete(RBTree *rbtree, RBTree *x);
+// 查找节点
+RBTree *rbSearch(RBTree *rbtree, RBTree *x);
+// 打印红黑树
+void rbPrintTree(RBTree *rbtree);
+// 辅助插入节点着色函数
+void rbInsertFixup(RBTree *rbtree, RBTree *x);
+// 辅助删除节点着色函数
+void rbDeleteFixup(RBTree *rbtree, RBTree *x);
+// 将子树v移植到子树u中
+void rbTransplant(RBTree *rbtree, RBTree *u, RBTree *v);
+// 红黑树的最大值
+// 红黑树的最小值
+RBTree *rbTreeMinimum(RBTree *rbtree);
+// 查找后继节点
+
+int main(void)
+{
+    RBTree *root = (RBTree *)malloc(sizeof(RBTree));
+    root->color = 1;
+    root->data = INT_MIN;
+    root->lchild = root->rchild = root->parent = NULL;
+    RBTree t1, t2, t3, t4, t5, t6, t7, t8, t9;
+    t1.color = t2.color = t3.color = t4.color = t5.color = t6.color = t7.color = t8.color = t9.color = 0;
+    t1.lchild = t1.rchild = t1.parent = NULL;
+    t2.lchild = t2.rchild = t2.parent = NULL;
+    t3.lchild = t3.rchild = t3.parent = NULL;
+    t4.lchild = t4.rchild = t4.parent = NULL;
+    t5.lchild = t5.rchild = t5.parent = NULL;
+    t6.lchild = t6.rchild = t6.parent = NULL;
+    t7.lchild = t7.rchild = t7.parent = NULL;
+    t8.lchild = t8.rchild = t8.parent = NULL;
+    t9.lchild = t9.rchild = t9.parent = NULL;
+    t1.data = 11;
+    t2.data = 2;
+    t3.data = 14;
+    t4.data = 1;
+    t5.data = 7;
+    t6.data = 15;
+    t7.data = 5;
+    t8.data = 8;
+    t9.data = 4;
+
+    rbInsert(root, &t1);
+    rbInsert(root, &t2);
+    rbInsert(root, &t3);
+    rbInsert(root, &t4);
+    rbInsert(root, &t5);
+    rbInsert(root, &t6);
+    rbInsert(root, &t7);
+    rbInsert(root, &t8);
+    rbInsert(root, &t9);
+
+    rbPrintTree(root->lchild);
+    printf("\n");
+
+    rbDelete(root, &t1);
+    rbDelete(root, &t4);
+    rbDelete(root, &t5);
+    rbPrintTree(root->lchild);
+    printf("\n");
+
+    return 0;
+}
+
+// 左旋函数
+void leftRotate(RBTree *rbtree, RBTree *x)
+{
+    RBTree *y = x->rchild;
+    x->rchild = y->lchild;
+    if (NULL != y->lchild) {
+        y->lchild->parent = x;
+    }
+    y->parent = x->parent;
+    if (NULL == x->parent) {
+        rbtree = y;
+    } else if (x == x->parent->lchild) {
+        x->parent->lchild = y;
+    } else {
+        x->parent->rchild = y;
+    }
+    y->lchild = x;
+    x->parent = y;
+}
+// 右旋函数
+void rightRotate(RBTree *rbtree, RBTree *y)
+{
+    RBTree *x = y->lchild;
+    y->lchild = x->rchild;
+    if (NULL != x->rchild) {
+        x->rchild->parent = y;
+    }
+    x->parent = y->parent;
+    if (NULL == y->parent) {
+        rbtree = x;
+    } else if (y == y->parent->lchild) {
+         y->parent->lchild = x;
+    } else {
+        y->parent->rchild = x;
+    }
+    x->rchild = y;
+    y->parent = x;
+}
+// 插入函数
+void rbInsert(RBTree *rbtree, RBTree *z)
+{
+    RBTree *y = NULL;
+    RBTree *x = rbtree->lchild;
+    while (x) {
+         y = x;
+         if (z->data < x->data) {
+             x = x->lchild;
+         } else {
+             x = x->rchild;
+         }
+    }
+    z->parent = y;
+    if (NULL == y) {
+         z->parent = rbtree;
+         rbtree->lchild = z;
+    } else if (z->data < y->data) {
+        y->lchild = z;
+    } else {
+        y->rchild = z;
+    }
+    z->lchild = NULL;
+    z->rchild = NULL;
+    z->color = 0;
+    rbInsertFixup(rbtree, z);
+}
+
+void rbInsertFixup(RBTree *rbtree, RBTree *z)
+{
+    while (z->parent->color == 0) {
+        if (z->parent == z->parent->parent->lchild) {
+            RBTree *y = z->parent->parent->rchild;
+            if (y->color == 0) {
+                z->parent->color = 1;
+                y->color = 1;
+                z->parent->parent->color = 0;
+                z = z->parent->parent;
+            } else if (z == z->parent->rchild) {
+                 z = z->parent;
+                 leftRotate(rbtree->lchild, z);
+            } else {
+                z->parent->color = 1;
+                z->parent->parent->color = 0;
+                rightRotate(rbtree->lchild, z->parent->parent);
+            }
+        } else {
+            RBTree *y = z->parent->parent->lchild;
+            if (y->color == 0) {
+                 z->parent->color = 1;
+                 y->color = 1;
+                 z->parent->parent->color = 0;
+                 z = z->parent->parent;
+            } else if (z == z->parent->rchild) {
+                z = z->parent;
+                leftRotate(rbtree->lchild, z);
+            } else {
+                z->parent->color = 1;
+                z->parent->parent->color = 0;
+                rightRotate(rbtree->lchild, z->parent->parent);
+            }
+        }
+    }
+    rbtree->lchild->color = 1;
+}
+
+void rbPrintTree(RBTree *rbtree)
+{
+    if (rbtree != NULL) {
+        rbPrintTree(rbtree->lchild);
+        printf("{%d:%s}", rbtree->data, rbtree->color ? "BLACK" : "RED");
+        rbPrintTree(rbtree->rchild);
+    }
+}
+
+
+void rbTransplant(RBTree *rbtree, RBTree *u, RBTree *v)
+{
+    if (u->parent == NULL) {
+        rbtree = v;
+    } else if (u == u->parent->lchild) {
+        u->parent->lchild = v;
+    } else {
+        u->parent->rchild = v;
+    }
+    if (NULL != v) {
+        v->parent = u->parent;
+    }
+}
+
+void rbDelete(RBTree *rbtree, RBTree *z)
+{
+    RBTree *y = z;
+    RBTree *x = NULL;
+    int oldColor = y->color;
+    if (NULL == z->lchild) {
+        x = z->rchild;
+        rbTransplant(rbtree->lchild, z, z->rchild);
+    } else if (NULL == z->rchild) {
+        x = z->lchild;
+        rbTransplant(rbtree->lchild, z, z->lchild);
+    } else {
+        y = rbTreeMinimum(z->rchild);
+        oldColor = y->color;
+        x = y->rchild;
+        if (y->parent == z) {
+            x->parent = y;
+        } else {
+            rbTransplant(rbtree->lchild, y, y->rchild);
+            y->rchild = z->rchild;
+            y->rchild->parent = y;
+        }
+        rbTransplant(rbtree->lchild, z, y);
+        y->lchild = z->lchild;
+        y->lchild->parent = y;
+        y->color = z->color;
+    }
+    if (oldColor == 1) {
+         rbDeleteFixup(rbtree, x);
+    }
+}
+
+RBTree *rbTreeMinimum(RBTree *rbtree)
+{
+    while (rbtree->lchild) {
+        rbtree = rbtree->lchild;
+    }
+
+    return rbtree;
+}
+void rbDeleteFixup(RBTree *rbtree, RBTree *x)
+{
+
+}

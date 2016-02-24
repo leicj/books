@@ -1,0 +1,131 @@
+问题起源:
+    投资一家公司,允许股票的买入卖出.该公司给出未来17天的股票价格走势.制定策略,决定哪天买入,哪天卖出收益最大?
+股票价格的走势图:
+天      0       1       2       3       4       5       6       7       8       9       10      11      12      13      14      15      16
+价格    100     113     110     85      105     102     86      63      81      101     94      106     101     79      94      90      97
+变化            13      -3      -25     20      -3      -16     -23     18      20      -7      12      -5      -22     15      -4      7
+
+暴力求解法:
+    简单的尝试每对可能的买进卖出日期组合,只要卖出日期在买入日期之后即可.复杂度为O(n^2)
+
+问题变换:
+    我们只要寻找一段日期,使得从第一天到最后一天的股票价格净变值最大.假设数组A代表价格变化,则问题就转化为寻找A的和最大的非空连续子数组,我们称这样的连续子数组为最大子数组.
+
+使用分治策略的求解方法
+    A[low..high]的任何连续子数组A[i..j]所处的位置必然是以下三种情况之一:
+1. 完全位于子数组A[low..mid]中,因此low<=i<=j<=mid
+2. 完全位于子数组A[mid+1..high]中,因此mid<=i<=j<=mid
+3. 跨越了中点,因此low<=i<=mid<j<=high
+    由于1,2种情况完全会继续细分成第三种情况.过程FIND-MAX-CORSSING-SUBARRAY接收数组A和下表low, mid和high为输入,返回一个下表元祖跨越中点的最大子数组的边界,并返回最大子数组中值的和.
+FIND-MAX-CROSSING-SUBARRAY(A, low, mid, high)
+    left-sum = MIN-INT
+    sum = 0
+    for i = mid downto low
+        sum = sum + A[i]
+        if sum > left-sum
+            left-sum = sum
+            max-left = i
+    right-sum = MIN-INT
+    sum = 0
+    for j = mid + 1 to high
+        sum = sum + A[j]
+        if sum > right-sum
+            right-sum = sum
+            max-right = j
+    return (max-left, max-right, left-sum + right-sum)
+
+FIND-MAXIMUM-SUBARRAY(A, low, high)
+    if high == low
+        return (low, high, A[low])
+    else mid = (low + high) / 2
+        (left-low, left-high, left-sum) = FIND-MAXIMUM-SUBARRAY(A, low, mid)
+        (right-low, right-high, right-sum) = FIND-MAXIMUM-SUBARRAY(A, mid+ 1, right)
+        (cross-low, cross-high, cross-sum) = FIND-MAX-CROSSING-SUBARRAY(A, low, mid, high)
+
+    if left-sum >= right-sum and left-sum >= cross-sum
+        return (left-low, left-high, left-sum)
+    else if right-sum >= left-sum and right-sum >= cross-sum
+        return (right-low, right-high, right-sum)
+    else
+        return (cross-low, cross-high, cross-sum)
+
+具体实现C语言版:
+#include <stdio.h>
+#include <limits.h>
+
+void findMaxCrossingSubarray(int A[], int low, int mid, int high, int *maxLeft, int *maxRight, int *maxSum)
+{
+    int leftSum = INT_MIN;
+    int rightSum = INT_MIN;
+    int sum = 0;
+    int i = 0;
+
+    for (i = mid; i >= low; i--) {
+        sum = sum + A[i];
+        if (sum > leftSum) {
+            leftSum = sum;
+            *maxLeft = i;
+        }
+    }
+    sum = 0;
+    for (i = mid + 1; i <= high; i++) {
+        sum = sum + A[i];
+        if (sum > rightSum) {
+            rightSum = sum;
+            *maxRight = i;
+        }
+    }
+
+    *maxSum = leftSum + rightSum;
+    printf("low:%d, mid:%d, high:%d, maxLeft:%d, maxRight:%d, maxSum:%d\n", low, mid, high, *maxLeft, *maxRight, *maxSum);
+}
+
+void findMaxSubarray(int A[], int low, int high, int *maxLeft, int *maxRight, int *maxSum)
+{
+    int mid = (low + high) / 2;
+    int leftLow = 0, leftHigh = 0, leftSum = 0;
+    int rightLow = 0, rightHigh = 0, rightSum = 0;
+    int crossLow = 0, crossHigh = 0, crossSum = 0;
+    if (low == high) {
+        *maxLeft = low;
+        *maxRight = high;
+        *maxSum = A[low];
+    } else {
+        findMaxSubarray(A, low, mid, &leftLow, &leftHigh, &leftSum);
+        findMaxSubarray(A, mid + 1, high, &rightLow, &rightHigh, &rightSum);
+        findMaxCrossingSubarray(A, low, mid, high, &crossLow, &crossHigh, &crossSum);
+        if (leftSum >= rightSum && leftSum >= crossSum) {
+            *maxLeft = leftLow;
+            *maxRight = leftHigh;
+            *maxSum = leftSum;
+            return;
+        } else if (rightSum >= leftSum && rightSum >= crossSum) {
+            *maxLeft = rightLow;
+            *maxRight = rightHigh;
+            *maxSum = rightSum;
+            return;
+        } else {
+            *maxLeft = crossLow;
+            *maxRight = crossHigh;
+            *maxSum = crossSum;
+            return;
+        }
+    }
+}
+
+
+int main(void)
+{
+    int A[] = {13, -3, -25, 20, -3, -16, -23, 18, 20, -7, 12, -5, -22, 15, -4, 7};
+    int low = 0;
+    int high = 15;
+    int maxLeft = 0;
+    int maxRight = 0;
+    int maxSum = 0;
+    findMaxSubarray(A, low, high, &maxLeft, &maxRight, &maxSum);
+
+    printf("%d-%d:%d\n", maxLeft, maxRight, maxSum);
+
+    return 0;
+}
+
